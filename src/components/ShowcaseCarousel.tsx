@@ -7,6 +7,7 @@ interface ShowcaseCarouselProps {
   title: string;
   subtitle: string;
   badgeText?: string;
+  showBlinkingDot?: boolean;
   offers: Offer[];
   icon?: React.ReactNode;
   externalStorefrontUrl?: string;
@@ -21,6 +22,7 @@ export const ShowcaseCarousel: React.FC<ShowcaseCarouselProps> = ({
   title,
   subtitle,
   badgeText,
+  showBlinkingDot,
   offers,
   icon,
   externalStorefrontUrl,
@@ -57,8 +59,14 @@ export const ShowcaseCarousel: React.FC<ShowcaseCarouselProps> = ({
           )}
           <div className="flex items-center gap-2">
             {icon}
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              {title}
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+              <span>{title}</span>
+              {showBlinkingDot && (
+                <span className="flex h-3 w-3 relative inline-flex">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
+                </span>
+              )}
             </h2>
           </div>
           <p className="text-xs text-zinc-400">

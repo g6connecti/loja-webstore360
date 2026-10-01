@@ -244,6 +244,7 @@ function PublicShowcase() {
             {flashDeals.length > 0 && (
               <ShowcaseCarousel
                 title="Ofertas Relâmpago com Desconto Agressivo"
+                showBlinkingDot={true}
                 subtitle="Produtos com desconto máximo e estoque limitado nas plataformas parceiras"
                 badgeText="Tempo Limitado"
                 icon={<Zap className="w-5 h-5 text-amber-400 fill-amber-400" />}

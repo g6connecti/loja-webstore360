@@ -33,72 +33,35 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="absolute top-1/2 right-1/4 translate-y-1/4 w-96 h-96 bg-pink-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 mb-8">
-          
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-wider mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-spin" style={{ animationDuration: '4s' }} />
-              <span>Public Showcase • WebStore360 Oficial</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white mb-3">
-              Economize até <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8257e5] via-[#c24bf8] to-[#ff007a]">70% OFF</span> nas maiores <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">lojas do Brasil</span>.
-            </h1>
-
-            <p className="text-zinc-300 text-sm sm:text-base leading-relaxed mb-6 font-normal">
-              Curadoria inteligente e carrosséis com ofertas sincronizadas em tempo real com as APIs da Shopee e Amazon. Cupons testados e links com garantia de comissão e segurança.
-            </p>
-
-            {/* Quick stats pills */}
-            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-300">
-              <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span><strong className="text-white font-bold">{totalOffers}</strong> Ofertas ao Vivo</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
-                <Flame className="w-4 h-4 text-pink-400" />
-                <span>Descontos até 70%</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
-                <ShieldCheck className="w-4 h-4 text-purple-400" />
-                <span>Supabase PostgreSQL Protegido</span>
-              </div>
-            </div>
+        <div className="max-w-3xl mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-wider mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-spin" style={{ animationDuration: '4s' }} />
+            <span>Public Showcase • WebStore360 Oficial</span>
           </div>
 
-          {/* Flash Deals Card with vibrant gradient */}
-          <div className="w-full lg:w-auto bg-[#18181b] border border-zinc-800 rounded-3xl p-5 shadow-2xl backdrop-blur-sm shrink-0 lg:min-w-[320px] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-pink-500/20 via-purple-500/10 to-transparent pointer-events-none rounded-bl-full" />
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white mb-3">
+            Economize até <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8257e5] via-[#c24bf8] to-[#ff007a]">70% OFF</span> nas maiores <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">lojas do Brasil</span>.
+          </h1>
 
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-[#8257e5] to-[#ff007a] text-white shadow-lg shadow-purple-600/30">
-                  <Zap className="w-5 h-5 fill-white" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-sm text-white">Ofertas Relâmpago</h3>
-                  <p className="text-xs text-zinc-400">Tempo & Estoque Limitados</p>
-                </div>
-              </div>
-              <span className="flex h-3 w-3 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
-              </span>
+          <p className="text-zinc-300 text-sm sm:text-base leading-relaxed mb-6 font-normal">
+            Curadoria inteligente e carrosséis com ofertas sincronizadas em tempo real com as APIs da Shopee e Amazon. Cupons testados e links com garantia de comissão e segurança.
+          </p>
+
+          {/* Quick stats pills */}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-300">
+            <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span><strong className="text-white font-bold">{totalOffers}</strong> Ofertas ao Vivo</span>
             </div>
-
-            <button
-              onClick={onToggleFlashDeals}
-              className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                flashDealsOnly
-                  ? 'bg-gradient-to-r from-[#8257e5] to-[#ff007a] text-white shadow-lg shadow-purple-600/40 ring-2 ring-pink-500/30'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
-              }`}
-            >
-              <Zap className="w-4 h-4" />
-              <span>{flashDealsOnly ? 'Exibindo Apenas Relâmpago' : 'Filtrar Ofertas Relâmpago'}</span>
-            </button>
+            <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
+              <Flame className="w-4 h-4 text-pink-400" />
+              <span>Descontos até 70%</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#18181b] px-3 py-1.5 rounded-xl border border-zinc-800">
+              <ShieldCheck className="w-4 h-4 text-purple-400" />
+              <span>Links Oficiais Verificados</span>
+            </div>
           </div>
-
         </div>
 
         {/* Platform Filter Buttons */}
@@ -122,13 +85,27 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <button
               onClick={() => onSelectPlatform('all')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border ${
-                selectedPlatform === 'all'
+                selectedPlatform === 'all' && !flashDealsOnly
                   ? 'bg-gradient-to-r from-[#8257e5] to-[#ff007a] text-white border-transparent shadow-lg shadow-purple-600/30'
                   : 'bg-[#18181b] text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800'
               }`}
             >
               Todas as Plataformas
             </button>
+
+            {onToggleFlashDeals && (
+              <button
+                onClick={onToggleFlashDeals}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border flex items-center gap-1.5 ${
+                  flashDealsOnly
+                    ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white border-transparent shadow-lg shadow-pink-500/20'
+                    : 'bg-[#18181b] text-amber-400 border-amber-500/30 hover:border-amber-400 hover:bg-zinc-800'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>Ofertas Relâmpago</span>
+              </button>
+            )}
 
             {PLATFORMS.map((p) => {
               const isSelected = selectedPlatform === p.id;
