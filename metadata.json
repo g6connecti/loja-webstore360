@@ -1,0 +1,6 @@
+{
+  "name": "WebStore360 - Hub de Ofertas & Afiliados",
+  "description": "Plataforma de alta conversão para curadoria de ofertas, cupons e gerenciamento de afiliados com banco de dados PostgreSQL Cloud SQL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
