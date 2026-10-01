@@ -16,6 +16,12 @@ import {
   Layers,
   ArrowUpDown,
   Search,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  LogOut,
+  AlertTriangle,
 } from 'lucide-react';
 import { Offer, PlatformCredential, AdminStats, OfferStatus } from '../types/store.ts';
 import { useAuth } from '../context/AuthContext.tsx';
@@ -36,7 +42,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onRefreshOffers,
   onShowToast,
 }) => {
-  const { user, token, signInWithGoogle } = useAuth();
+  const { user, adminUser, token, signInWithGoogle, loginWithCredentials, logout, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'offers' | 'platforms' | 'schema'>('offers');
   
   // Data states
@@ -44,6 +50,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [platforms, setPlatforms] = useState<PlatformCredential[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('lagarelli@gmail.com');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filters inside admin offers
   const [adminSearch, setAdminSearch] = useState('');
@@ -55,11 +68,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [editingPlatform, setEditingPlatform] = useState<PlatformCredential | null>(null);
 
   const isTokenValid = Boolean(
-    token && token.trim() && token !== 'null' && token !== 'undefined' && token.split('.').length === 3
+    token && token.trim() && token !== 'null' && token !== 'undefined'
   );
 
+  const canAccess = isAdmin && isTokenValid;
+
   const fetchAdminData = async () => {
-    if (!isTokenValid) return;
+    if (!canAccess) return;
     setLoading(true);
     try {
       const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
@@ -90,44 +105,148 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen && isTokenValid) {
+    if (isOpen && canAccess) {
       fetchAdminData();
     }
-  }, [isOpen, isTokenValid]);
+  }, [isOpen, canAccess]);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await loginWithCredentials(loginEmail, loginPassword);
+      if (res.success) {
+        onShowToast('Bem-vindo, Administrador!');
+      } else {
+        setLoginError(res.error || 'Acesso negado.');
+      }
+    } catch (err: any) {
+      setLoginError(err.message || 'Falha ao autenticar.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSubmit = async () => {
+    setLoginError(null);
+    setIsSubmitting(true);
+    try {
+      await signInWithGoogle();
+      onShowToast('Bem-vindo, Administrador!');
+    } catch (err: any) {
+      setLoginError(err.message || 'Falha na autenticação Google');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!isOpen) return null;
 
-  if (!user || !isTokenValid) {
+  if (!canAccess) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-        <div className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-3xl border border-zinc-800 shadow-2xl p-6 sm:p-8 text-center text-white">
+        <div className="w-full max-w-md bg-[#18181b] rounded-3xl border border-zinc-800 shadow-2xl p-6 sm:p-8 text-center text-white relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
           <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-[#8257e5] to-[#ff007a] flex items-center justify-center text-white shadow-lg shadow-purple-600/30">
-            <Shield className="w-7 h-7" />
+            <Lock className="w-7 h-7" />
           </div>
           <h2 className="text-xl font-black text-white mb-2 tracking-tight">
             Acesso Restrito ao Painel
           </h2>
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-            Faça login com sua conta Google para gerenciar produtos, cadastrar ofertas e sincronizar as APIs das plataformas de afiliados.
+            Painel restrito exclusivamente para o administrador autorizado (<span className="text-purple-400 font-medium">lagarelli@gmail.com</span>).
           </p>
-          <div className="flex flex-col gap-3">
+
+          {loginError && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2 text-left text-xs text-red-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                Usuário / E-mail
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="lagarelli@gmail.com"
+                  required
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-zinc-900 border border-zinc-700/80 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Digite sua senha"
+                  required
+                  className="w-full pl-10 pr-10 py-2.5 bg-zinc-900 border border-zinc-700/80 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
             <button
-              onClick={async () => {
-                try {
-                  await signInWithGoogle();
-                } catch {
-                  onShowToast('Falha na autenticação Google');
-                }
-              }}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-purple-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-purple-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>{isSubmitting ? 'Verificando...' : 'Acessar Painel'}</span>
+            </button>
+          </form>
+
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-800" />
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+              <span className="bg-[#18181b] px-3 text-zinc-500">ou</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={handleGoogleSubmit}
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition-all flex items-center justify-center gap-2"
             >
               <span>Entrar com Conta Google</span>
             </button>
             <button
+              type="button"
               onClick={onClose}
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all"
+              className="w-full py-2 px-4 rounded-xl text-zinc-500 hover:text-zinc-300 text-xs transition-colors"
             >
-              Voltar à Loja
+              Voltar para o site
             </button>
           </div>
         </div>
@@ -137,7 +256,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Toggle Offer Status
   const handleToggleStatus = async (offer: Offer) => {
-    if (!isTokenValid) return;
+    if (!canAccess) return;
     const nextStatus: OfferStatus = offer.status === 'publicado' ? 'rascunho' : 'publicado';
     try {
       const res = await fetch(`/api/admin/offers/${offer.id}`, {
@@ -160,7 +279,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Delete Offer
   const handleDeleteOffer = async (id: string, title: string) => {
-    if (!isTokenValid) return;
+    if (!canAccess) return;
     if (!window.confirm(`Tem certeza que deseja remover a oferta "${title}"?`)) return;
 
     try {
@@ -180,8 +299,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Save new / edited offer
   const handleSaveOffer = async (offerData: any) => {
-    if (!isTokenValid) {
-      throw new Error('Faça login primeiro.');
+    if (!canAccess) {
+      throw new Error('Acesso restrito ao administrador.');
     }
     const isEdit = !!editingOffer;
     const url = isEdit ? `/api/admin/offers/${editingOffer.id}` : '/api/admin/offers';
@@ -208,8 +327,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Save platform credentials
   const handleSavePlatform = async (id: string, data: Partial<PlatformCredential>) => {
-    if (!isTokenValid) {
-      throw new Error('Faça login primeiro.');
+    if (!canAccess) {
+      throw new Error('Acesso restrito ao administrador.');
     }
     const res = await fetch(`/api/admin/platforms/${id}`, {
       method: 'PUT',
@@ -230,8 +349,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Sync platform catalog
   const handleSyncPlatform = async (id: string) => {
-    if (!isTokenValid) {
-      throw new Error('Faça login primeiro.');
+    if (!canAccess) {
+      throw new Error('Acesso restrito ao administrador.');
     }
     const res = await fetch(`/api/admin/platforms/${id}/sync`, {
       method: 'POST',
@@ -285,6 +404,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="text-zinc-300 font-mono">{adminUser?.email || user?.email}</span>
+            </div>
+            <button
+              onClick={async () => {
+                await logout();
+                onShowToast('Sessão de administrador encerrada.');
+              }}
+              title="Sair do modo administrador"
+              className="p-2 text-zinc-400 hover:text-rose-400 rounded-xl hover:bg-zinc-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
             <button
               onClick={fetchAdminData}
               title="Recarregar Dados"

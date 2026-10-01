@@ -1,4 +1,5 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -18,7 +19,8 @@ import {
   syncPlatform,
 } from './src/db/platforms.ts';
 import { getOrCreateUser } from './src/db/users.ts';
-import { requireAuth, optionalAuth, AuthRequest } from './src/middleware/auth.ts';
+import { requireAuth, optionalAuth, signAdminToken, AUTHORIZED_ADMIN_EMAIL, AUTHORIZED_ADMIN_PASSWORD } from './src/middleware/auth.ts';
+import type { AuthRequest } from './src/middleware/auth.ts';
 
 dotenv.config();
 
@@ -102,6 +104,49 @@ app.post('/api/offers/:id/click', async (req: Request, res: Response) => {
     console.error('Error recording click:', error);
     res.status(500).json({ error: error.message || 'Failed to record click' });
   }
+});
+
+// Auth API - Admin Login with exclusive credentials
+app.post('/api/auth/admin-login', async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    if (
+      normalizedEmail !== AUTHORIZED_ADMIN_EMAIL.toLowerCase() ||
+      String(password) !== AUTHORIZED_ADMIN_PASSWORD
+    ) {
+      return res.status(401).json({
+        error: 'Credenciais inválidas. Apenas o usuário lagarelli@gmail.com possui acesso administrativo.',
+      });
+    }
+
+    const token = signAdminToken(AUTHORIZED_ADMIN_EMAIL, 'Luiz Ricardo Agarelli');
+    res.json({
+      success: true,
+      token,
+      user: {
+        uid: 'admin-lagarelli',
+        email: AUTHORIZED_ADMIN_EMAIL,
+        displayName: 'Luiz Ricardo Agarelli',
+        role: 'admin',
+      },
+    });
+  } catch (error: any) {
+    console.error('Error during admin login:', error);
+    res.status(500).json({ error: 'Falha interna ao autenticar administrador.' });
+  }
+});
+
+// Auth API - Get current user profile
+app.get('/api/auth/me', requireAuth, async (req: AuthRequest, res: Response) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
 });
 
 // Auth API - Sync Firebase User to Postgres

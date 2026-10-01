@@ -17,7 +17,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenArchitecture,
   activeFilterCount,
 }) => {
-  const { user, signInWithGoogle, logout, isAdmin } = useAuth();
+  const { user, adminUser, logout, isAdmin } = useAuth();
+  const currentAdmin = adminUser || (user?.email?.toLowerCase() === 'lagarelli@gmail.com' ? user : null);
 
   return (
     <header className="sticky top-0 z-40 bg-[#121214]/95 backdrop-blur-md border-b border-zinc-800/80 text-white shadow-2xl">
@@ -96,22 +97,25 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Auth Button with Gradient */}
-            {user ? (
+            {currentAdmin ? (
               <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-800">
-                {user.photoURL ? (
+                {user?.photoURL ? (
                   <img
                     src={user.photoURL}
-                    alt={user.displayName || 'Admin'}
+                    alt={currentAdmin.displayName || 'Admin'}
                     className="w-8 h-8 rounded-full border border-purple-400 ring-2 ring-purple-500/20"
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
-                    {(user.displayName || user.email || 'A').charAt(0).toUpperCase()}
+                    {(currentAdmin.displayName || currentAdmin.email || 'A').charAt(0).toUpperCase()}
                   </div>
                 )}
+                <span className="hidden lg:inline text-xs text-zinc-300 font-medium">
+                  {currentAdmin.email}
+                </span>
                 <button
                   onClick={logout}
-                  title="Sair"
+                  title="Sair da conta"
                   className="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
@@ -119,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             ) : (
               <button
-                onClick={signInWithGoogle}
+                onClick={onOpenAdmin}
                 className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/30 transition-all active:scale-95"
               >
                 <UserIcon className="w-3.5 h-3.5" />
