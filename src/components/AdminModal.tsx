@@ -36,7 +36,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onRefreshOffers,
   onShowToast,
 }) => {
-  const { token } = useAuth();
+  const { user, token, signInWithGoogle } = useAuth();
   const [activeTab, setActiveTab] = useState<'offers' | 'platforms' | 'schema'>('offers');
   
   // Data states
@@ -54,10 +54,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [editingPlatform, setEditingPlatform] = useState<PlatformCredential | null>(null);
 
+  const isTokenValid = Boolean(
+    token && token.trim() && token !== 'null' && token !== 'undefined' && token.split('.').length === 3
+  );
+
   const fetchAdminData = async () => {
+    if (!isTokenValid) return;
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
       
       const [resOffers, resPlatforms, resStats] = await Promise.all([
         fetch('/api/offers?status=all', { headers }),
@@ -85,15 +90,54 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isTokenValid) {
       fetchAdminData();
     }
-  }, [isOpen]);
+  }, [isOpen, isTokenValid]);
 
   if (!isOpen) return null;
 
+  if (!user || !isTokenValid) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-3xl border border-zinc-800 shadow-2xl p-6 sm:p-8 text-center text-white">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-[#8257e5] to-[#ff007a] flex items-center justify-center text-white shadow-lg shadow-purple-600/30">
+            <Shield className="w-7 h-7" />
+          </div>
+          <h2 className="text-xl font-black text-white mb-2 tracking-tight">
+            Acesso Restrito ao Painel
+          </h2>
+          <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+            Faça login com sua conta Google para gerenciar produtos, cadastrar ofertas e sincronizar as APIs das plataformas de afiliados.
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={async () => {
+                try {
+                  await signInWithGoogle();
+                } catch {
+                  onShowToast('Falha na autenticação Google');
+                }
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-purple-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <span>Entrar com Conta Google</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all"
+            >
+              Voltar à Loja
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Toggle Offer Status
   const handleToggleStatus = async (offer: Offer) => {
+    if (!isTokenValid) return;
     const nextStatus: OfferStatus = offer.status === 'publicado' ? 'rascunho' : 'publicado';
     try {
       const res = await fetch(`/api/admin/offers/${offer.id}`, {
@@ -116,6 +160,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Delete Offer
   const handleDeleteOffer = async (id: string, title: string) => {
+    if (!isTokenValid) return;
     if (!window.confirm(`Tem certeza que deseja remover a oferta "${title}"?`)) return;
 
     try {
@@ -135,6 +180,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Save new / edited offer
   const handleSaveOffer = async (offerData: any) => {
+    if (!isTokenValid) {
+      throw new Error('Faça login primeiro.');
+    }
     const isEdit = !!editingOffer;
     const url = isEdit ? `/api/admin/offers/${editingOffer.id}` : '/api/admin/offers';
     const method = isEdit ? 'PUT' : 'POST';
@@ -160,6 +208,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Save platform credentials
   const handleSavePlatform = async (id: string, data: Partial<PlatformCredential>) => {
+    if (!isTokenValid) {
+      throw new Error('Faça login primeiro.');
+    }
     const res = await fetch(`/api/admin/platforms/${id}`, {
       method: 'PUT',
       headers: {
@@ -179,6 +230,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Sync platform catalog
   const handleSyncPlatform = async (id: string) => {
+    if (!isTokenValid) {
+      throw new Error('Faça login primeiro.');
+    }
     const res = await fetch(`/api/admin/platforms/${id}/sync`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },

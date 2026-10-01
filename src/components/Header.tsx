@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 font-medium hidden sm:block">
-                Hub Inteligente de Ofertas & Afiliados
+                Hub Inteligente de Ofertas
               </p>
             </div>
           </div>

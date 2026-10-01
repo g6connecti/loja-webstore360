@@ -9,7 +9,7 @@ export interface GetOffersFilter {
   flashDealsOnly?: boolean;
   featuredOnly?: boolean;
   status?: string; // 'publicado' | 'rascunho' | 'all'
-  sortBy?: 'discount' | 'clicks' | 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  sortBy?: 'discount' | 'clicks' | 'price_asc' | 'price_desc' | 'rating' | 'newest' | 'title_asc' | 'title_desc';
 }
 
 export async function getOffers(filters: GetOffersFilter = {}, isAdmin: boolean = false) {
@@ -58,7 +58,11 @@ export async function getOffers(filters: GetOffersFilter = {}, isAdmin: boolean 
     }
 
     // Sort order
-    if (filters.sortBy === 'clicks') {
+    if (filters.sortBy === 'title_asc') {
+      query = query.orderBy(asc(produtosOfertas.title)) as any;
+    } else if (filters.sortBy === 'title_desc') {
+      query = query.orderBy(desc(produtosOfertas.title)) as any;
+    } else if (filters.sortBy === 'clicks') {
       query = query.orderBy(desc(produtosOfertas.clicksCount)) as any;
     } else if (filters.sortBy === 'price_asc') {
       query = query.orderBy(asc(produtosOfertas.discountPrice)) as any;

@@ -42,7 +42,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white mb-3">
-              Economize até <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8257e5] via-[#c24bf8] to-[#ff007a]">70% OFF</span> nas maiores lojas do Brasil.
+              Economize até <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8257e5] via-[#c24bf8] to-[#ff007a]">70% OFF</span> nas maiores <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">lojas do Brasil</span>.
             </h1>
 
             <p className="text-zinc-300 text-sm sm:text-base leading-relaxed mb-6 font-normal">

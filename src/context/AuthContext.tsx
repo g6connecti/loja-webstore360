@@ -31,15 +31,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentUser) {
         try {
           const idToken = await currentUser.getIdToken();
-          setToken(idToken);
-          // Sync with server users table
-          await fetch('/api/auth/sync-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${idToken}`,
-            },
-          });
+          if (idToken && idToken.split('.').length === 3) {
+            setToken(idToken);
+            // Sync with server users table
+            await fetch('/api/auth/sync-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
+              },
+            });
+          }
         } catch (err) {
           console.error('Error fetching token/syncing user:', err);
         }

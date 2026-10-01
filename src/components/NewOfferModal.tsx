@@ -177,6 +177,10 @@ export const NewOfferModal: React.FC<NewOfferModalProps> = ({
                     setCategory('Ferramentas');
                   } else if (val === 'shopee') {
                     setAffiliateUrl('https://collshp.com/lagarelli180?share_channel_code=1&view=storefront');
+                  } else if (val === 'temu') {
+                    setAffiliateUrl('https://temu.to/k/gjscu6s338i');
+                  } else if (val === 'mercadolivre') {
+                    setAffiliateUrl('https://www.mercadolivre.com.br/social/luizricardoagarelli');
                   }
                 }}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"

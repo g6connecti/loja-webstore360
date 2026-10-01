@@ -32,7 +32,7 @@ function PublicShowcase() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [flashDealsOnly, setFlashDealsOnly] = useState(false);
-  const [sortBy, setSortBy] = useState('discount');
+  const [sortBy, setSortBy] = useState('title_asc');
 
   // Modals
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
@@ -58,8 +58,8 @@ function PublicShowcase() {
       if (sortBy) params.append('sortBy', sortBy);
 
       const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      if (token && token.trim() && token !== 'null' && token !== 'undefined' && token.split('.').length === 3) {
+        headers['Authorization'] = `Bearer ${token.trim()}`;
       }
 
       const res = await fetch(`/api/offers?${params.toString()}`, { headers });
@@ -91,14 +91,16 @@ function PublicShowcase() {
   // Categories list
   const categories = useMemo(() => {
     return [
+      'Doces & Queijos Mineiros',
+      'Cafés & Gourmet',
+      'Utensílios & Café',
       'Eletrônicos',
       'Smartphones',
-      'Casa Inteligente',
       'Ferramentas',
-      'Eletroportáteis',
+      'Casa Inteligente',
       'Áudio',
       'Games',
-      'Móveis & Escritório',
+      'Beleza & Perfumaria',
     ];
   }, []);
 
@@ -109,6 +111,10 @@ function PublicShowcase() {
 
   const amazonDeals = useMemo(() => {
     return offers.filter((o) => o.platform === 'amazon');
+  }, [offers]);
+
+  const mercadoLivreDeals = useMemo(() => {
+    return offers.filter((o) => o.platform === 'mercadolivre');
   }, [offers]);
 
   const shopeeDeals = useMemo(() => {
@@ -125,6 +131,13 @@ function PublicShowcase() {
 
   const lojaDoMecanicoDeals = useMemo(() => {
     return offers.filter((o) => o.platform === 'lojadomecanico');
+  }, [offers]);
+
+  // Full catalog cards strictly ordered alphabetically by product title (A - Z)
+  const catalogOffersAlphabetical = useMemo(() => {
+    return [...offers].sort((a, b) =>
+      a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base', numeric: true })
+    );
   }, [offers]);
 
   const activeFilterCount =
@@ -257,7 +270,24 @@ function PublicShowcase() {
               />
             )}
 
-            {/* Carousel 3: Shopee Oficial Storefront */}
+            {/* Carousel 3: Mercado Livre Oficial Storefront */}
+            {mercadoLivreDeals.length > 0 && (
+              <ShowcaseCarousel
+                title="Achados & Recomendações Mercado Livre"
+                subtitle="Seleção oficial da vitrine de afiliados WEBSTORE360 com entrega rápida e frete grátis"
+                badgeText="Mercado Livre Oficial"
+                icon={<ShoppingBag className="w-5 h-5 text-yellow-400 fill-yellow-400/20" />}
+                offers={mercadoLivreDeals}
+                externalStorefrontUrl="https://www.mercadolivre.com.br/social/luizricardoagarelli"
+                storefrontLabel="Minha Vitrine Mercado Livre 📦"
+                onOpenDetails={setSelectedOffer}
+                onShare={setShareOffer}
+                onShowToast={showToast}
+                onViewAll={() => setSelectedPlatform('mercadolivre')}
+              />
+            )}
+
+            {/* Carousel 4: Shopee Oficial Storefront */}
             {shopeeDeals.length > 0 && (
               <ShowcaseCarousel
                 title="Achadinhos & Ofertas Oficiais Shopee"
@@ -265,6 +295,8 @@ function PublicShowcase() {
                 badgeText="Shopee Oficial"
                 icon={<ShoppingBag className="w-5 h-5 text-orange-500 fill-orange-500/20" />}
                 offers={shopeeDeals}
+                externalStorefrontUrl="https://collshp.com/lagarelli180?share_channel_code=1&view=storefront"
+                storefrontLabel="Minha Vitrine Shopee"
                 onOpenDetails={setSelectedOffer}
                 onShare={setShareOffer}
                 onShowToast={showToast}
@@ -276,10 +308,12 @@ function PublicShowcase() {
             {temuDeals.length > 0 && (
               <ShowcaseCarousel
                 title="Super Achados & Descontos Temu"
-                subtitle="Preços direto dos fabricantes, gadgets virais e descontos agressivos de até 70% OFF"
+                subtitle="✨ Descubra coisas incríveis na vitrine com pack de cupons especial e preços imbatíveis!"
                 badgeText="Temu Oficial"
                 icon={<Sparkles className="w-5 h-5 text-pink-500 fill-pink-500/20" />}
                 offers={temuDeals}
+                externalStorefrontUrl="https://temu.to/k/gjscu6s338i"
+                storefrontLabel="Pack de Cupons & Vitrine 🎁"
                 onOpenDetails={setSelectedOffer}
                 onShare={setShareOffer}
                 onShowToast={showToast}
@@ -310,6 +344,8 @@ function PublicShowcase() {
                 badgeText="Parceiro Oficial"
                 icon={<Wrench className="w-5 h-5 text-amber-500 fill-amber-500/20" />}
                 offers={lojaDoMecanicoDeals}
+                externalStorefrontUrl="https://www.lojadomecanico.com.br/parceiro/X2bTZwI8TsWzqqpT2gfmPA?utm_campaign=afiliado-X2bTZwI8TsWzqqpT2gfmPA&utm_source=afiliado&utm_medium=site"
+                storefrontLabel="Loja do Parceiro"
                 onOpenDetails={setSelectedOffer}
                 onShare={setShareOffer}
                 onShowToast={showToast}
@@ -321,20 +357,23 @@ function PublicShowcase() {
             <section className="pt-8 border-t border-zinc-800">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-black text-white tracking-tight">
-                    Catálogo Completo de Ofertas
+                  <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                    <span>Catálogo Completo de Ofertas</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      A - Z
+                    </span>
                   </h3>
                   <p className="text-xs text-zinc-400">
-                    Todas as ofertas publicadas no banco de dados Supabase
+                    Todas as ofertas publicadas organizadas em ordem alfabética pelo nome do produto
                   </p>
                 </div>
                 <span className="text-xs font-bold text-purple-400">
-                  {offers.length} produtos disponíveis
+                  {catalogOffersAlphabetical.length} produtos disponíveis
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {offers.map((offer) => (
+                {catalogOffersAlphabetical.map((offer) => (
                   <OfferCard
                     key={offer.id}
                     offer={offer}

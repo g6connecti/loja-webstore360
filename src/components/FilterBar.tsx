@@ -64,11 +64,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onChange={(e) => onSortChange(e.target.value)}
                 className="py-1.5 px-2.5 text-xs font-bold rounded-xl bg-[#18181b] border border-zinc-800 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer"
               >
+                <option value="title_asc">Ordem Alfabética (A - Z)</option>
                 <option value="discount">Maior % Desconto</option>
                 <option value="clicks">Mais Clicados / Populares</option>
                 <option value="price_asc">Menor Preço</option>
                 <option value="price_desc">Maior Preço</option>
                 <option value="rating">Melhor Avaliação</option>
+                <option value="title_desc">Ordem Alfabética (Z - A)</option>
                 <option value="newest">Mais Recentes</option>
               </select>
             </div>

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { ChevronLeft, ChevronRight, Zap, Sparkles, Radio } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Radio, ExternalLink } from 'lucide-react';
 import { Offer } from '../types/store.ts';
 import { OfferCard } from './OfferCard.tsx';
 
@@ -9,6 +9,8 @@ interface ShowcaseCarouselProps {
   badgeText?: string;
   offers: Offer[];
   icon?: React.ReactNode;
+  externalStorefrontUrl?: string;
+  storefrontLabel?: string;
   onOpenDetails: (offer: Offer) => void;
   onShare: (offer: Offer) => void;
   onShowToast: (msg: string) => void;
@@ -21,6 +23,8 @@ export const ShowcaseCarousel: React.FC<ShowcaseCarouselProps> = ({
   badgeText,
   offers,
   icon,
+  externalStorefrontUrl,
+  storefrontLabel,
   onOpenDetails,
   onShare,
   onShowToast,
@@ -62,8 +66,19 @@ export const ShowcaseCarousel: React.FC<ShowcaseCarouselProps> = ({
           </p>
         </div>
 
-        {/* Carousel Navigation Buttons */}
+        {/* Carousel Actions & Navigation Buttons */}
         <div className="flex items-center gap-2 self-end">
+          {externalStorefrontUrl && (
+            <a
+              href={externalStorefrontUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-orange-500/20 transition-all active:scale-95"
+            >
+              <span>{storefrontLabel || 'Minha Vitrine'}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          )}
           <button
             onClick={() => scroll('left')}
             className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-purple-500/50 transition-all shadow-md active:scale-95"
