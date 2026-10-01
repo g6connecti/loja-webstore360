@@ -60,19 +60,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 role: 'admin',
               });
               setToken(storedToken);
-            } else {
-              localStorage.removeItem('webstore360_admin_token');
-              setToken(null);
-              setAdminUser(null);
+              setLoading(false);
+              return;
             }
-          } else {
-            localStorage.removeItem('webstore360_admin_token');
-            setToken(null);
-            setAdminUser(null);
           }
         } catch {
-          // Token check failed
+          // If server is not present (static deploy)
         }
+
+        // Direct token validation for static hosting
+        try {
+          const parts = storedToken.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+              setAdminUser({
+                uid: payload.uid || 'admin-lagarelli',
+                email: payload.email,
+                displayName: payload.name || 'Luiz Ricardo Agarelli',
+                role: 'admin',
+              });
+              setToken(storedToken);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {
+          // parse error
+        }
+
+        // If validation failed
+        localStorage.removeItem('webstore360_admin_token');
+        setToken(null);
+        setAdminUser(null);
       }
       setLoading(false);
     };
@@ -113,30 +133,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with Email & Password (lagarelli@gmail.com / Lr@@200862##)
   const loginWithCredentials = async (email: string, password: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 1. Try local express backend if available
     try {
       const res = await fetch('/api/auth/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.token) {
+          setToken(data.token);
+          setAdminUser(data.user);
+          localStorage.setItem('webstore360_admin_token', data.token);
+          return { success: true };
+        }
+      } else if (res.status === 401 || res.status === 403) {
+        const data = await res.json().catch(() => ({}));
         return {
           success: false,
           error: data.error || 'Credenciais inválidas. Verifique o usuário e a senha.',
         };
       }
-
-      setToken(data.token);
-      setAdminUser(data.user);
-      localStorage.setItem('webstore360_admin_token', data.token);
-
-      return { success: true };
-    } catch (err: any) {
-      console.error('Login error:', err);
-      return { success: false, error: 'Erro de conexão ao autenticar. Tente novamente.' };
+    } catch {
+      // Backend not running (e.g. static hosting on GitHub Pages/Vercel)
     }
+
+    // 2. Direct client verification (essential for static deployments without /api routes)
+    if (normalizedEmail === AUTHORIZED_ADMIN_EMAIL.toLowerCase() && password === 'Lr@@200862##') {
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+      const payload = btoa(
+        JSON.stringify({
+          uid: 'admin-lagarelli',
+          email: AUTHORIZED_ADMIN_EMAIL,
+          name: 'Luiz Ricardo Agarelli',
+          role: 'admin',
+          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+        })
+      );
+      const directToken = `${header}.${payload}.static_client_auth`;
+      const adminInfo: AdminUser = {
+        uid: 'admin-lagarelli',
+        email: AUTHORIZED_ADMIN_EMAIL,
+        displayName: 'Luiz Ricardo Agarelli',
+        role: 'admin',
+      };
+      setToken(directToken);
+      setAdminUser(adminInfo);
+      localStorage.setItem('webstore360_admin_token', directToken);
+      return { success: true };
+    }
+
+    return {
+      success: false,
+      error: 'Credenciais inválidas. Apenas o usuário lagarelli@gmail.com possui acesso administrativo.',
+    };
   };
 
   // Google Sign-In with strict email whitelist

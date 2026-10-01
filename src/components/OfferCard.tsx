@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, Copy, Check, Star, Zap, Share2, Eye, MousePointerClick } from 'lucide-react';
 import { Offer } from '../types/store.ts';
 import { formatCurrency, PLATFORM_CONFIG, copyToClipboard } from '../utils/format.ts';
+import { recordClickDirectly } from '../lib/supabase.ts';
 
 interface OfferCardProps {
   offer: Offer;
@@ -44,7 +45,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     setClicking(true);
 
     try {
-      fetch(`/api/offers/${offer.id}/click`, { method: 'POST' }).catch(() => {});
+      recordClickDirectly(offer.id);
     } catch {
       // ignore
     }

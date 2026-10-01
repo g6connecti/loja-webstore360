@@ -18,6 +18,7 @@ import { Toast } from './components/Toast.tsx';
 import { Footer } from './components/Footer.tsx';
 import { Offer } from './types/store.ts';
 import { Zap, ShoppingBag, AlertCircle, Wrench, Package, Sparkles, Globe } from 'lucide-react';
+import { fetchOffersDirectly } from './lib/supabase.ts';
 
 function PublicShowcase() {
   const { token } = useAuth();
@@ -50,27 +51,18 @@ function PublicShowcase() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
-      if (selectedPlatform && selectedPlatform !== 'all') params.append('platform', selectedPlatform);
-      if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
-      if (searchQuery.trim()) params.append('search', searchQuery.trim());
-      if (flashDealsOnly) params.append('flashDealsOnly', 'true');
-      if (sortBy) params.append('sortBy', sortBy);
-
-      const headers: HeadersInit = {};
-      if (token && token.trim() && token !== 'null' && token !== 'undefined' && token.split('.').length === 3) {
-        headers['Authorization'] = `Bearer ${token.trim()}`;
-      }
-
-      const res = await fetch(`/api/offers?${params.toString()}`, { headers });
-      if (!res.ok) {
-        throw new Error('Falha ao consultar ofertas no Supabase.');
-      }
-      const data = await res.json();
-      setOffers(data.data || []);
+      const data = await fetchOffersDirectly({
+        platform: selectedPlatform,
+        category: selectedCategory,
+        search: searchQuery,
+        flashDealsOnly,
+        sortBy: sortBy as any,
+        status: 'publicado',
+      });
+      setOffers(data);
     } catch (err: any) {
-      console.error('Error fetching offers:', err);
-      setError(err.message || 'Erro ao carregar ofertas.');
+      console.error('Error fetching offers from Supabase:', err);
+      setError(err.message || 'Erro ao carregar ofertas do Supabase.');
     } finally {
       setLoading(false);
     }

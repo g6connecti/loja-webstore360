@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ExternalLink, Copy, Check, Star, Zap, Share2, Shield, Truck, Calendar, Tag } from 'lucide-react';
 import { Offer } from '../types/store.ts';
 import { formatCurrency, PLATFORM_CONFIG, copyToClipboard } from '../utils/format.ts';
+import { recordClickDirectly } from '../lib/supabase.ts';
 
 interface OfferDetailModalProps {
   offer: Offer | null;
@@ -40,7 +41,7 @@ export const OfferDetailModal: React.FC<OfferDetailModalProps> = ({
   };
 
   const handleGoToStore = () => {
-    fetch(`/api/offers/${offer.id}/click`, { method: 'POST' }).catch(() => {});
+    recordClickDirectly(offer.id);
     window.open(offer.affiliateUrl, '_blank', 'noopener,noreferrer');
   };
 
