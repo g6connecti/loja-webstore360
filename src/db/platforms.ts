@@ -1,6 +1,7 @@
 import { db } from './index.ts';
 import { plataformasCredenciais } from './schema.ts';
 import { eq, desc } from 'drizzle-orm';
+import { syncShopeeStorefront, syncMercadoLivreStorefront } from '../services/vitrineSync.ts';
 
 export async function getPlatforms() {
   try {
@@ -31,6 +32,19 @@ export async function updatePlatformCredentials(
 
 export async function syncPlatform(id: string) {
   try {
+    const existing = await db
+      .select()
+      .from(plataformasCredenciais)
+      .where(eq(plataformasCredenciais.id, id))
+      .limit(1);
+
+    const platform = existing[0];
+    if (platform && platform.platformName === 'shopee') {
+      await syncShopeeStorefront(platform.affiliatePartnerId || 'lagarelli180');
+    } else if (platform && platform.platformName === 'mercadolivre') {
+      await syncMercadoLivreStorefront(platform.affiliatePartnerId || 'luizricardoagarelli');
+    }
+
     const updated = await db
       .update(plataformasCredenciais)
       .set({

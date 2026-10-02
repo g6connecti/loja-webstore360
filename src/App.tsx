@@ -17,8 +17,39 @@ import { ArchitectureModal } from './components/ArchitectureModal.tsx';
 import { Toast } from './components/Toast.tsx';
 import { Footer } from './components/Footer.tsx';
 import { Offer } from './types/store.ts';
-import { Zap, ShoppingBag, AlertCircle, Wrench, Package, Sparkles, Globe } from 'lucide-react';
-import { fetchOffersDirectly } from './lib/supabase.ts';
+import { Zap, ShoppingBag, AlertCircle, Wrench, Package, Sparkles, Globe, RefreshCw, Radio, CheckCircle2 } from 'lucide-react';
+import { fetchOffersDirectly, subscribeToOffersRealtime, triggerVitrineSync, isSupabaseConfigured } from './lib/supabase.ts';
+
+// Função utilitária para deduplicação rigorosa de ofertas
+function deduplicateOffers(items: Offer[]): Offer[] {
+  const seenIds = new Set<string>();
+  const seenSlugs = new Set<string>();
+  const seenKeys = new Set<string>();
+  const result: Offer[] = [];
+
+  for (const item of items) {
+    if (!item || !item.id) continue;
+    if (seenIds.has(item.id)) continue;
+    if (item.slug && seenSlugs.has(item.slug)) continue;
+
+    // Normalização do título para evitar duplicatas com pequenas variações de texto na mesma plataforma
+    const normTitle = (item.title || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .slice(0, 32);
+
+    const platformKey = `${(item.platform || '').toLowerCase()}_${normTitle}`;
+    if (normTitle && seenKeys.has(platformKey)) continue;
+
+    seenIds.add(item.id);
+    if (item.slug) seenSlugs.add(item.slug);
+    if (normTitle) seenKeys.add(platformKey);
+    result.push(item);
+  }
+  return result;
+}
 
 function PublicShowcase() {
   const { token } = useAuth();
@@ -27,6 +58,8 @@ function PublicShowcase() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSyncingVitrine, setIsSyncingVitrine] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,7 +92,7 @@ function PublicShowcase() {
         sortBy: sortBy as any,
         status: 'publicado',
       });
-      setOffers(data);
+      setOffers(deduplicateOffers(data));
     } catch (err: any) {
       console.error('Error fetching offers from Supabase:', err);
       setError(err.message || 'Erro ao carregar ofertas do Supabase.');
@@ -71,6 +104,60 @@ function PublicShowcase() {
   useEffect(() => {
     fetchOffers();
   }, [selectedPlatform, selectedCategory, flashDealsOnly, sortBy, token]);
+
+  // Supabase Realtime subscription ("Ao Vivo")
+  useEffect(() => {
+    const unsubscribe = subscribeToOffersRealtime((payload) => {
+      if (payload.eventType === 'INSERT' && payload.newOffer) {
+        setOffers((prev) => deduplicateOffers([payload.newOffer!, ...prev]));
+        showToast(`⚡ Nova oferta "${payload.newOffer.title.slice(0, 32)}..." recebida ao vivo!`);
+      } else if (payload.eventType === 'UPDATE' && payload.newOffer) {
+        setOffers((prev) =>
+          deduplicateOffers(prev.map((o) => (o.id === payload.newOffer!.id ? payload.newOffer! : o)))
+        );
+        showToast('⚡ Oferta atualizada ao vivo!');
+      } else if (payload.eventType === 'DELETE' && payload.oldOfferId) {
+        setOffers((prev) => prev.filter((o) => o.id !== payload.oldOfferId));
+        showToast('Oferta removida ao vivo.');
+      }
+    });
+
+    // Auto-sync suave das vitrines na montagem
+    triggerVitrineSync()
+      .then((res) => {
+        if (res.success && res.data?.newlyAdded > 0) {
+          fetchOffers();
+          showToast(`⚡ ${res.data.newlyAdded} novos produtos da vitrine adicionados!`);
+        }
+        if (res.data?.syncedAt) {
+          setLastSyncTime(new Date(res.data.syncedAt).toLocaleTimeString('pt-BR'));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const handleManualSync = async () => {
+    setIsSyncingVitrine(true);
+    showToast('🔄 Sincronizando produtos da vitrine das plataformas...');
+    try {
+      const res = await triggerVitrineSync();
+      if (res.success) {
+        showToast(`✅ ${res.message}`);
+        await fetchOffers();
+        setLastSyncTime(new Date().toLocaleTimeString('pt-BR'));
+      } else {
+        showToast(res.message || 'Erro ao sincronizar vitrines.');
+      }
+    } catch {
+      showToast('Erro ao conectar com serviço de sincronização.');
+    } finally {
+      setIsSyncingVitrine(false);
+    }
+  };
 
   // Instant search debounce
   useEffect(() => {
@@ -98,36 +185,51 @@ function PublicShowcase() {
 
   // Filtered subsets for the Carousels
   const flashDeals = useMemo(() => {
-    return offers.filter((o) => o.isFlashDeal);
-  }, [offers]);
-
-  const amazonDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'amazon');
+    return deduplicateOffers(offers.filter((o) => o.isFlashDeal));
   }, [offers]);
 
   const mercadoLivreDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'mercadolivre');
+    return deduplicateOffers(
+      offers.filter((o) => {
+        const p = (o.platform || '').toLowerCase().replace(/[\s_-]/g, '');
+        return p === 'mercadolivre' || p === 'meli';
+      })
+    );
   }, [offers]);
 
   const shopeeDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'shopee');
+    return deduplicateOffers(
+      offers.filter((o) => {
+        const p = (o.platform || '').toLowerCase().replace(/[\s_-]/g, '');
+        return p === 'shopee';
+      })
+    );
+  }, [offers]);
+
+  const amazonDeals = useMemo(() => {
+    return deduplicateOffers(
+      offers.filter((o) => {
+        const p = (o.platform || '').toLowerCase().replace(/[\s_-]/g, '');
+        return p === 'amazon';
+      })
+    );
   }, [offers]);
 
   const temuDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'temu');
+    return deduplicateOffers(offers.filter((o) => o.platform === 'temu'));
   }, [offers]);
 
   const aliexpressDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'aliexpress');
+    return deduplicateOffers(offers.filter((o) => o.platform === 'aliexpress'));
   }, [offers]);
 
   const lojaDoMecanicoDeals = useMemo(() => {
-    return offers.filter((o) => o.platform === 'lojadomecanico');
+    return deduplicateOffers(offers.filter((o) => o.platform === 'lojadomecanico'));
   }, [offers]);
 
   // Full catalog cards strictly ordered alphabetically by product title (A - Z)
   const catalogOffersAlphabetical = useMemo(() => {
-    return [...offers].sort((a, b) =>
+    return deduplicateOffers([...offers]).sort((a, b) =>
       a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base', numeric: true })
     );
   }, [offers]);
@@ -179,8 +281,48 @@ function PublicShowcase() {
       />
 
       {/* 4. Main Public Showcase Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         
+        {/* Realtime Live Status & Platform Vitrine Sync Bar */}
+        <div className="bg-[#18181b]/90 border border-zinc-800 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl ring-1 ring-white/5">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex items-center justify-center shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span className="absolute w-4 h-4 rounded-full bg-emerald-400/50 animate-ping"></span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black text-white tracking-wide uppercase">
+                  Ao Vivo • Supabase Realtime & Vitrines
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                  Sincronização Ativa
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-400">
+                Novos produtos adicionados na sua vitrine da Shopee, Mercado Livre ou Supabase são atualizados automaticamente aqui.
+                {lastSyncTime && (
+                  <span className="text-zinc-500 ml-1.5">
+                    (Última sincronização: {lastSyncTime})
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end shrink-0">
+            <button
+              onClick={handleManualSync}
+              disabled={isSyncingVitrine}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white text-xs font-bold transition-all shadow-md shadow-purple-600/30 active:scale-95 disabled:opacity-60"
+              title="Busca produtos recém adicionados na sua vitrine de afiliados Shopee e Mercado Livre"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingVitrine ? 'animate-spin' : ''}`} />
+              <span>{isSyncingVitrine ? 'Sincronizando Vitrine...' : 'Sincronizar Minha Vitrine'}</span>
+            </button>
+          </div>
+        </div>
+
         {/* Error notification banner if any */}
         {error && (
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-between">
@@ -248,22 +390,7 @@ function PublicShowcase() {
               />
             )}
 
-            {/* Carousel 2: Amazon Oficial Storefront */}
-            {amazonDeals.length > 0 && (
-              <ShowcaseCarousel
-                title="Seleção Prime & Ofertas Amazon"
-                subtitle="Dispositivos Echo com Alexa, Kindle, eletrônicos e entrega super rápida Prime"
-                badgeText="Amazon Prime"
-                icon={<Package className="w-5 h-5 text-amber-400 fill-amber-400/20" />}
-                offers={amazonDeals}
-                onOpenDetails={setSelectedOffer}
-                onShare={setShareOffer}
-                onShowToast={showToast}
-                onViewAll={() => setSelectedPlatform('amazon')}
-              />
-            )}
-
-            {/* Carousel 3: Mercado Livre Oficial Storefront */}
+            {/* Carousel 2: Mercado Livre Oficial Storefront */}
             {mercadoLivreDeals.length > 0 && (
               <ShowcaseCarousel
                 title="Achados & Recomendações Mercado Livre"
@@ -271,7 +398,7 @@ function PublicShowcase() {
                 badgeText="Mercado Livre Oficial"
                 icon={<ShoppingBag className="w-5 h-5 text-yellow-400 fill-yellow-400/20" />}
                 offers={mercadoLivreDeals}
-                externalStorefrontUrl="https://www.mercadolivre.com.br/social/luizricardoagarelli"
+                externalStorefrontUrl="https://www.mercadolivre.com.br/social/luizricardoagarelli/lists"
                 storefrontLabel="Minha Vitrine Mercado Livre 📦"
                 onOpenDetails={setSelectedOffer}
                 onShare={setShareOffer}
@@ -280,7 +407,7 @@ function PublicShowcase() {
               />
             )}
 
-            {/* Carousel 4: Shopee Oficial Storefront */}
+            {/* Carousel 3: Shopee Oficial Storefront */}
             {shopeeDeals.length > 0 && (
               <ShowcaseCarousel
                 title="Achadinhos & Ofertas Oficiais Shopee"
@@ -294,6 +421,21 @@ function PublicShowcase() {
                 onShare={setShareOffer}
                 onShowToast={showToast}
                 onViewAll={() => setSelectedPlatform('shopee')}
+              />
+            )}
+
+            {/* Carousel 4: Amazon Oficial Storefront */}
+            {amazonDeals.length > 0 && (
+              <ShowcaseCarousel
+                title="Seleção Prime & Ofertas Amazon"
+                subtitle="Dispositivos Echo com Alexa, Kindle, eletrônicos e entrega super rápida Prime"
+                badgeText="Amazon Prime"
+                icon={<Package className="w-5 h-5 text-amber-400 fill-amber-400/20" />}
+                offers={amazonDeals}
+                onOpenDetails={setSelectedOffer}
+                onShare={setShareOffer}
+                onShowToast={showToast}
+                onViewAll={() => setSelectedPlatform('amazon')}
               />
             )}
 

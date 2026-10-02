@@ -13,12 +13,9 @@ import {
   deleteOffer,
   getStats,
 } from './src/db/offers.ts';
-import {
-  getPlatforms,
-  updatePlatformCredentials,
-  syncPlatform,
-} from './src/db/platforms.ts';
+import { getPlatforms, updatePlatformCredentials, syncPlatform } from './src/db/platforms.ts';
 import { getOrCreateUser } from './src/db/users.ts';
+import { syncAllVitrines, syncShopeeStorefront } from './src/services/vitrineSync.ts';
 import { requireAuth, optionalAuth, signAdminToken, AUTHORIZED_ADMIN_EMAIL, AUTHORIZED_ADMIN_PASSWORD } from './src/middleware/auth.ts';
 import type { AuthRequest } from './src/middleware/auth.ts';
 
@@ -258,6 +255,31 @@ app.post('/api/admin/platforms/:id/sync', requireAuth, async (req: AuthRequest, 
   }
 });
 
+// Public/Admin API - Sincronização em tempo real das Vitrines de Afiliados (Shopee, etc.)
+app.post('/api/sync/vitrine', async (req: Request, res: Response) => {
+  try {
+    const results = await syncAllVitrines();
+    const totalFound = results.reduce((acc, r) => acc + r.totalFound, 0);
+    const newlyAdded = results.reduce((acc, r) => acc + r.newlyAdded, 0);
+    const updated = results.reduce((acc, r) => acc + r.updated, 0);
+
+    res.json({
+      success: true,
+      message: `Vitrines sincronizadas! ${newlyAdded} novos produtos adicionados, ${updated} atualizados.`,
+      data: {
+        results,
+        totalFound,
+        newlyAdded,
+        updated,
+        syncedAt: new Date().toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('Erro ao sincronizar vitrines:', error);
+    res.status(500).json({ success: false, error: error.message || 'Falha ao sincronizar vitrines' });
+  }
+});
+
 // Admin API - Dashboard Stats
 app.get('/api/admin/stats', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -294,6 +316,19 @@ async function startServer() {
 
   app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`WebStore360 server running on http://0.0.0.0:${PORT}`);
+
+    // Auto-sync das vitrines na inicialização (após 3s para liberar inicialização do servidor)
+    setTimeout(() => {
+      console.log('Iniciando sincronização automática das vitrines de afiliados...');
+      syncAllVitrines()
+        .then((res) => console.log('Sincronização inicial de vitrines concluída:', res))
+        .catch((err) => console.error('Erro na sincronização de vitrines:', err));
+    }, 3000);
+
+    // Repetir sincronização das vitrines a cada 10 minutos
+    setInterval(() => {
+      syncAllVitrines().catch((err) => console.error('Erro na sincronização periódica:', err));
+    }, 10 * 60 * 1000);
   });
 }
 

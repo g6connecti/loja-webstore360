@@ -4,8 +4,8 @@ import { INITIAL_OFFERS } from '../data/initialOffers.ts';
 
 // Get Supabase credentials from Vite environment or localStorage
 export const getSupabaseConfig = () => {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL;
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const envUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_URL : undefined;
+  const envKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_ANON_KEY : undefined;
   const localUrl = typeof window !== 'undefined' ? localStorage.getItem('VITE_SUPABASE_URL') : null;
   const localKey = typeof window !== 'undefined' ? localStorage.getItem('VITE_SUPABASE_ANON_KEY') : null;
 
@@ -145,37 +145,139 @@ export interface FetchOffersOptions {
 
 /**
  * Busca direta no Supabase pela tabela 'ofertas' (com fallback para 'produtos_ofertas').
- * Se o Supabase não estiver configurado ou offline, utiliza o catálogo local de segurança.
+ * Se o Supabase não estiver configurado ou estiver vazio, busca via /api/offers ou dados locais.
  */
 export async function fetchOffersDirectly(options: FetchOffersOptions = {}): Promise<Offer[]> {
   const client = getSupabase();
 
+  if (client) {
+    try {
+      // Tenta primeiramente a tabela 'ofertas' solicitada pelo usuário
+      let result = await executeSupabaseQuery(client, 'ofertas', options);
+
+      // Se 'ofertas' não existir (ex: erro 42P01), tenta 'produtos_ofertas'
+      if (result.error && (result.error.code === '42P01' || result.error.message?.includes('does not exist'))) {
+        result = await executeSupabaseQuery(client, 'produtos_ofertas', options);
+      }
+
+      if (!result.error && result.data && result.data.length > 0) {
+        return result.data.map(normalizeOfferRow);
+      }
+    } catch (err) {
+      console.warn('Falha na consulta direta ao Supabase, tentando rota da API / local:', err);
+    }
+  }
+
+  // Fallback para API local (/api/offers) caso o Supabase não esteja configurado ou sem dados
+  try {
+    const params = new URLSearchParams();
+    if (options.platform && options.platform !== 'all') params.set('platform', options.platform);
+    if (options.category && options.category !== 'all') params.set('category', options.category);
+    if (options.search) params.set('search', options.search);
+    if (options.flashDealsOnly) params.set('flashDealsOnly', 'true');
+    if (options.status) params.set('status', options.status);
+    if (options.sortBy) params.set('sortBy', options.sortBy);
+
+    const res = await fetch(`/api/offers?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
+    }
+  } catch (apiErr) {
+    // API local não disponível
+  }
+
+  return filterLocalOffers(INITIAL_OFFERS, options);
+}
+
+export type RealtimePayload = {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  newOffer?: Offer;
+  oldOfferId?: string;
+};
+
+/**
+ * Assina eventos em tempo real ("Ao Vivo") no Supabase para as tabelas 'ofertas' e 'produtos_ofertas'.
+ * Quando um produto é inserido, atualizado ou excluído no Supabase, a função de callback é acionada instantaneamente.
+ */
+export function subscribeToOffersRealtime(
+  onEvent: (payload: RealtimePayload) => void
+): () => void {
+  const client = getSupabase();
   if (!client) {
-    console.warn('Supabase não configurado. Utilizando dados locais.');
-    return filterLocalOffers(INITIAL_OFFERS, options);
+    return () => {};
   }
 
-  // Tenta primeiramente a tabela 'ofertas' solicitada pelo usuário
-  let result = await executeSupabaseQuery(client, 'ofertas', options);
+  try {
+    const channelName = `realtime-ofertas-${Date.now()}`;
+    const channel = client
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ofertas' },
+        (payload: any) => {
+          const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+          if (eventType === 'INSERT' && payload.new) {
+            onEvent({ eventType, newOffer: normalizeOfferRow(payload.new) });
+          } else if (eventType === 'UPDATE' && payload.new) {
+            onEvent({ eventType, newOffer: normalizeOfferRow(payload.new) });
+          } else if (eventType === 'DELETE' && payload.old) {
+            onEvent({ eventType, oldOfferId: String(payload.old.id) });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'produtos_ofertas' },
+        (payload: any) => {
+          const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+          if (eventType === 'INSERT' && payload.new) {
+            onEvent({ eventType, newOffer: normalizeOfferRow(payload.new) });
+          } else if (eventType === 'UPDATE' && payload.new) {
+            onEvent({ eventType, newOffer: normalizeOfferRow(payload.new) });
+          } else if (eventType === 'DELETE' && payload.old) {
+            onEvent({ eventType, oldOfferId: String(payload.old.id) });
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.info('🟢 Conectado ao Supabase Realtime ("Ao Vivo") com sucesso!');
+        }
+      });
 
-  // Se 'ofertas' não existir (ex: erro 42P01), tenta 'produtos_ofertas'
-  if (result.error && (result.error.code === '42P01' || result.error.message?.includes('does not exist'))) {
-    console.info("Tabela 'ofertas' não encontrada, tentando 'produtos_ofertas'...");
-    result = await executeSupabaseQuery(client, 'produtos_ofertas', options);
+    return () => {
+      client.removeChannel(channel);
+    };
+  } catch (err) {
+    console.error('Erro ao configurar Supabase Realtime:', err);
+    return () => {};
   }
+}
 
-  if (result.error) {
-    console.error('Erro na consulta Supabase:', result.error);
-    // Fallback para não deixar a interface quebrada
-    return filterLocalOffers(INITIAL_OFFERS, options);
+/**
+ * Aciona a sincronização das vitrines das plataformas (Shopee, etc.) no backend
+ */
+export async function triggerVitrineSync(): Promise<{
+  success: boolean;
+  message: string;
+  data?: any;
+}> {
+  try {
+    const res = await fetch('/api/sync/vitrine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const json = await res.json();
+    return json;
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err.message || 'Falha ao sincronizar vitrines das plataformas.',
+    };
   }
-
-  if (!result.data || result.data.length === 0) {
-    // Se a tabela estiver vazia na primeira inicialização, podemos retornar vazio ou fallback se for sem filtro
-    return [];
-  }
-
-  return result.data.map(normalizeOfferRow);
 }
 
 async function executeSupabaseQuery(client: SupabaseClient, tableName: string, options: FetchOffersOptions) {
@@ -331,12 +433,13 @@ export async function adminGetStatsDirectly(): Promise<AdminStats> {
     const drafts = totalOffers - published;
     const totalClicks = INITIAL_OFFERS.reduce((acc, o) => acc + (o.clicksCount || 0), 0);
     const totalViews = INITIAL_OFFERS.reduce((acc, o) => acc + (o.viewsCount || 0), 0);
-    return { totalOffers, published, drafts, totalClicks, totalViews };
+    const estCommissionBrl = Number((totalClicks * 1.85).toFixed(2));
+    return { totalOffers, published, drafts, totalClicks, totalViews, estCommissionBrl };
   }
 
   const { data, error } = await client.from('ofertas').select('status, clicks_count, views_count');
   if (error || !data) {
-    return { totalOffers: 0, published: 0, drafts: 0, totalClicks: 0, totalViews: 0 };
+    return { totalOffers: 0, published: 0, drafts: 0, totalClicks: 0, totalViews: 0, estCommissionBrl: 0 };
   }
 
   const totalOffers = data.length;
@@ -344,8 +447,9 @@ export async function adminGetStatsDirectly(): Promise<AdminStats> {
   const drafts = data.filter((r) => r.status === 'rascunho').length;
   const totalClicks = data.reduce((acc, r) => acc + (r.clicks_count || 0), 0);
   const totalViews = data.reduce((acc, r) => acc + (r.views_count || 0), 0);
+  const estCommissionBrl = Number((totalClicks * 1.85).toFixed(2));
 
-  return { totalOffers, published, drafts, totalClicks, totalViews };
+  return { totalOffers, published, drafts, totalClicks, totalViews, estCommissionBrl };
 }
 
 /**

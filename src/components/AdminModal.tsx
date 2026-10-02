@@ -66,12 +66,33 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [isNewOfferOpen, setIsNewOfferOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [editingPlatform, setEditingPlatform] = useState<PlatformCredential | null>(null);
+  const [isSyncingVitrines, setIsSyncingVitrines] = useState(false);
 
   const isTokenValid = Boolean(
     token && token.trim() && token !== 'null' && token !== 'undefined'
   );
 
   const canAccess = isAdmin && isTokenValid;
+
+  const handleSyncAllVitrines = async () => {
+    setIsSyncingVitrines(true);
+    onShowToast('🔄 Sincronizando vitrines das plataformas (Shopee, etc.)...');
+    try {
+      const res = await fetch('/api/sync/vitrine', { method: 'POST' });
+      const json = await res.json();
+      if (json.success) {
+        onShowToast(`✅ ${json.message}`);
+        await fetchAdminData();
+        onRefreshOffers();
+      } else {
+        onShowToast(json.error || 'Erro na sincronização de vitrines.');
+      }
+    } catch {
+      onShowToast('Falha ao conectar com o serviço de sincronização.');
+    } finally {
+      setIsSyncingVitrines(false);
+    }
+  };
 
   const fetchAdminData = async () => {
     if (!canAccess) return;
@@ -404,6 +425,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleSyncAllVitrines}
+              disabled={isSyncingVitrines}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#8257e5] to-[#ff007a] hover:from-[#7145d6] hover:to-[#e0006c] text-white text-xs font-bold shadow-md shadow-purple-600/30 transition-all active:scale-95 disabled:opacity-60"
+              title="Sincroniza produtos diretamente da sua vitrine da Shopee e outras plataformas"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingVitrines ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">
+                {isSyncingVitrines ? 'Sincronizando...' : 'Sincronizar Vitrines'}
+              </span>
+            </button>
+
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
               <span className="text-zinc-300 font-mono">{adminUser?.email || user?.email}</span>
