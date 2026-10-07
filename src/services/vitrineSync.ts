@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import { Offer } from '../types/store.ts';
+import type { Offer } from '../types/store.ts';
 
 dotenv.config();
 
@@ -87,7 +87,11 @@ export async function syncShopeeStorefront(urlSuffix = 'lagarelli180'): Promise<
   try {
     const res = await fetch('https://collshp.com/api/v3/gql/graphql', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'application/json, text/plain, */*',
+      },
       body: JSON.stringify({
         operationName: 'getLinkLists',
         query,
@@ -96,10 +100,25 @@ export async function syncShopeeStorefront(urlSuffix = 'lagarelli180'): Promise<
     });
 
     if (!res.ok) {
-      throw new Error(`Falha HTTP ao consultar Shopee vitrine: ${res.statusText}`);
+      throw new Error(`Falha HTTP ao consultar Shopee vitrine: ${res.status} ${res.statusText}`);
     }
 
-    const json = await res.json();
+    const text = await res.text();
+    let json: any = null;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      console.warn(`Resposta da Shopee vitrine não é JSON válido: ${text.slice(0, 120)}`);
+      return {
+        platform: 'shopee',
+        totalFound: 0,
+        newlyAdded: 0,
+        updated: 0,
+        timestamp: new Date().toISOString(),
+        error: 'A página da Shopee retornou conteúdo não-JSON. A vitrine pode estar temporariamente sob validação.',
+      };
+    }
+
     const list: Array<{ linkId: string; link: string; linkName: string; image: string }> =
       json?.data?.landingPageLinkList?.linkList || [];
 
@@ -116,7 +135,8 @@ export async function syncShopeeStorefront(urlSuffix = 'lagarelli180'): Promise<
     let newlyAdded = 0;
     let updated = 0;
 
-    const databases = ['cloud_sql_production_database', 'cloud_sql_development_database'];
+    const targetDb = process.env.SQL_DB_NAME || 'cloud_sql_production_database';
+    const databases = Array.from(new Set([targetDb, 'cloud_sql_production_database', 'cloud_sql_development_database'])).filter(Boolean);
 
     for (const dbName of databases) {
       if (!process.env.SQL_HOST) continue;

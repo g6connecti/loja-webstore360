@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, Shield, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { PlatformCredential } from '../types/store.ts';
+import type { PlatformCredential } from '../types/store.ts';
 
 interface PlatformEditModalProps {
   platform: PlatformCredential | null;

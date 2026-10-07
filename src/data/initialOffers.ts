@@ -1,4 +1,4 @@
-import { Offer } from "../types/store.ts";
+import type { Offer } from "../types/store.ts";
 
 export const INITIAL_OFFERS: Offer[] = [
   {

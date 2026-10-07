@@ -256,7 +256,7 @@ app.post('/api/admin/platforms/:id/sync', requireAuth, async (req: AuthRequest, 
 });
 
 // Public/Admin API - Sincronização em tempo real das Vitrines de Afiliados (Shopee, etc.)
-app.post('/api/sync/vitrine', async (req: Request, res: Response) => {
+app.all('/api/sync/vitrine', async (req: Request, res: Response) => {
   try {
     const results = await syncAllVitrines();
     const totalFound = results.reduce((acc, r) => acc + r.totalFound, 0);
@@ -294,6 +294,14 @@ app.get('/api/admin/stats', requireAuth, async (req: AuthRequest, res: Response)
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'WebStore360 API', timestamp: new Date().toISOString() });
+});
+
+// 404 Fallback for any API routes - Garante que rotas /api/* NUNCA retornem HTML
+app.all('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `Rota de API não encontrada: ${req.method} ${req.path}`,
+  });
 });
 
 // Frontend Vite Integration

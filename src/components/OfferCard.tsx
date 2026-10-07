@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ExternalLink, Copy, Check, Star, Zap, Share2, Eye, MousePointerClick } from 'lucide-react';
-import { Offer } from '../types/store.ts';
+import type { Offer } from '../types/store.ts';
 import { formatCurrency, PLATFORM_CONFIG, copyToClipboard } from '../utils/format.ts';
 import { recordClickDirectly } from '../lib/supabase.ts';
 

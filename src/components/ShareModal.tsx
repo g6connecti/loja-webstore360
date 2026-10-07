@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, MessageSquare, Send, Link as LinkIcon, Share2 } from 'lucide-react';
-import { Offer } from '../types/store.ts';
+import type { Offer } from '../types/store.ts';
 import { formatCurrency, PLATFORM_CONFIG, copyToClipboard } from '../utils/format.ts';
 
 interface ShareModalProps {

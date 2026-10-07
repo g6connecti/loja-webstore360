@@ -1,4 +1,4 @@
-import { PlatformType } from '../types/store.ts';
+import type { PlatformType } from '../types/store.ts';
 
 export function formatCurrency(value: number | string | undefined | null): string {
   if (value === undefined || value === null || isNaN(Number(value))) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Tag, DollarSign, Image, Link as LinkIcon, AlertCircle } from 'lucide-react';
-import { Offer, PlatformType, OfferStatus } from '../types/store.ts';
+import type { Offer, PlatformType, OfferStatus } from '../types/store.ts';
 
 interface NewOfferModalProps {
   isOpen: boolean;

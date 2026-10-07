@@ -1,7 +1,11 @@
 import React from 'react';
 import { ShieldCheck, Heart, Sparkles, Database } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenSocialBanners?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenSocialBanners }) => {
   return (
     <footer className="bg-slate-950 border-t border-slate-800 text-slate-400 text-xs py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -21,10 +25,22 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Cloud SQL connection badge */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
-            <Database className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Banco de Dados: <strong className="text-emerald-400">Cloud SQL PostgreSQL</strong></span>
+          <div className="flex flex-wrap items-center gap-3">
+            {onOpenSocialBanners && (
+              <button
+                onClick={onOpenSocialBanners}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-600/20 to-purple-600/20 border border-pink-500/40 text-[11px] text-pink-300 hover:text-white hover:border-pink-500 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                <span>Kit Banners de Divulgação (Redes Sociais)</span>
+              </button>
+            )}
+
+            {/* Cloud SQL connection badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Banco de Dados: <strong className="text-emerald-400">Cloud SQL PostgreSQL</strong></span>
+            </div>
           </div>
         </div>
 

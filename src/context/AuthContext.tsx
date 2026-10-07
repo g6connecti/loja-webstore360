@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleAuthProvider } from '../lib/firebase.ts';
+import { safeJsonFetch } from '../utils/api.ts';
 
 export const AUTHORIZED_ADMIN_EMAIL = 'lagarelli@gmail.com';
 
@@ -47,22 +48,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const storedToken = localStorage.getItem('webstore360_admin_token');
       if (storedToken) {
         try {
-          const res = await fetch('/api/auth/me', {
+          const { ok, data } = await safeJsonFetch<any>('/api/auth/me', {
             headers: { Authorization: `Bearer ${storedToken}` },
           });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.user?.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-              setAdminUser({
-                uid: data.user.uid || 'admin-lagarelli',
-                email: data.user.email,
-                displayName: data.user.name || 'Luiz Ricardo Agarelli',
-                role: 'admin',
-              });
-              setToken(storedToken);
-              setLoading(false);
-              return;
-            }
+          if (ok && data?.user?.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+            setAdminUser({
+              uid: data.user.uid || 'admin-lagarelli',
+              email: data.user.email,
+              displayName: data.user.name || 'Luiz Ricardo Agarelli',
+              role: 'admin',
+            });
+            setToken(storedToken);
+            setLoading(false);
+            return;
           }
         } catch {
           // If server is not present (static deploy)
@@ -137,25 +135,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 1. Try local express backend if available
     try {
-      const res = await fetch('/api/auth/admin-login', {
+      const { ok, status, data } = await safeJsonFetch<any>('/api/auth/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.token) {
-          setToken(data.token);
-          setAdminUser(data.user);
-          localStorage.setItem('webstore360_admin_token', data.token);
-          return { success: true };
-        }
-      } else if (res.status === 401 || res.status === 403) {
-        const data = await res.json().catch(() => ({}));
+      if (ok && data?.success && data.token) {
+        setToken(data.token);
+        setAdminUser(data.user);
+        localStorage.setItem('webstore360_admin_token', data.token);
+        return { success: true };
+      } else if (status === 401 || status === 403) {
         return {
           success: false,
-          error: data.error || 'Credenciais inválidas. Verifique o usuário e a senha.',
+          error: data?.error || 'Credenciais inválidas. Verifique o usuário e a senha.',
         };
       }
     } catch {

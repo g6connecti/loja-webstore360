@@ -23,9 +23,10 @@ import {
   LogOut,
   AlertTriangle,
 } from 'lucide-react';
-import { Offer, PlatformCredential, AdminStats, OfferStatus } from '../types/store.ts';
+import type { Offer, PlatformCredential, AdminStats, OfferStatus } from '../types/store.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { formatCurrency, PLATFORM_CONFIG } from '../utils/format.ts';
+import { safeJsonFetch } from '../utils/api.ts';
 import { NewOfferModal } from './NewOfferModal.tsx';
 import { PlatformEditModal } from './PlatformEditModal.tsx';
 
@@ -78,14 +79,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setIsSyncingVitrines(true);
     onShowToast('🔄 Sincronizando vitrines das plataformas (Shopee, etc.)...');
     try {
-      const res = await fetch('/api/sync/vitrine', { method: 'POST' });
-      const json = await res.json();
-      if (json.success) {
-        onShowToast(`✅ ${json.message}`);
+      const { ok, data, error } = await safeJsonFetch<any>('/api/sync/vitrine', { method: 'POST' });
+      if (ok && data?.success) {
+        onShowToast(`✅ ${data.message}`);
         await fetchAdminData();
         onRefreshOffers();
       } else {
-        onShowToast(json.error || 'Erro na sincronização de vitrines.');
+        onShowToast(error || data?.error || 'Erro na sincronização de vitrines.');
       }
     } catch {
       onShowToast('Falha ao conectar com o serviço de sincronização.');
@@ -101,22 +101,19 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
       
       const [resOffers, resPlatforms, resStats] = await Promise.all([
-        fetch('/api/offers?status=all', { headers }),
-        fetch('/api/admin/platforms', { headers }),
-        fetch('/api/admin/stats', { headers }),
+        safeJsonFetch<any>('/api/offers?status=all', { headers }),
+        safeJsonFetch<any>('/api/admin/platforms', { headers }),
+        safeJsonFetch<any>('/api/admin/stats', { headers }),
       ]);
 
-      if (resOffers.ok) {
-        const d = await resOffers.json();
-        setOffers(d.data || []);
+      if (resOffers.ok && resOffers.data) {
+        setOffers(resOffers.data.data || []);
       }
-      if (resPlatforms.ok) {
-        const d = await resPlatforms.json();
-        setPlatforms(d.data || []);
+      if (resPlatforms.ok && resPlatforms.data) {
+        setPlatforms(resPlatforms.data.data || []);
       }
-      if (resStats.ok) {
-        const d = await resStats.json();
-        setStats(d.data || null);
+      if (resStats.ok && resStats.data) {
+        setStats(resStats.data.data || null);
       }
     } catch (err) {
       console.error('Error fetching admin data:', err);
@@ -280,7 +277,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!canAccess) return;
     const nextStatus: OfferStatus = offer.status === 'publicado' ? 'rascunho' : 'publicado';
     try {
-      const res = await fetch(`/api/admin/offers/${offer.id}`, {
+      const { ok } = await safeJsonFetch(`/api/admin/offers/${offer.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -288,10 +285,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         },
         body: JSON.stringify({ status: nextStatus }),
       });
-      if (res.ok) {
+      if (ok) {
         onShowToast(`Status alterado para "${nextStatus.toUpperCase()}"!`);
         fetchAdminData();
         onRefreshOffers();
+      } else {
+        onShowToast('Erro ao atualizar status da oferta.');
       }
     } catch {
       onShowToast('Erro ao atualizar status');
@@ -304,14 +303,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!window.confirm(`Tem certeza que deseja remover a oferta "${title}"?`)) return;
 
     try {
-      const res = await fetch(`/api/admin/offers/${id}`, {
+      const { ok } = await safeJsonFetch(`/api/admin/offers/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
+      if (ok) {
         onShowToast('Oferta removida com sucesso!');
         fetchAdminData();
         onRefreshOffers();
+      } else {
+        onShowToast('Erro ao remover oferta.');
       }
     } catch {
       onShowToast('Erro ao remover oferta');
@@ -327,7 +328,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     const url = isEdit ? `/api/admin/offers/${editingOffer.id}` : '/api/admin/offers';
     const method = isEdit ? 'PUT' : 'POST';
 
-    const res = await fetch(url, {
+    const { ok, data, error } = await safeJsonFetch<any>(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -336,9 +337,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       body: JSON.stringify(offerData),
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Falha ao salvar');
+    if (!ok) {
+      throw new Error(error || data?.error || 'Falha ao salvar oferta.');
     }
 
     onShowToast(isEdit ? 'Oferta atualizada no PostgreSQL!' : 'Nova oferta cadastrada com sucesso!');
@@ -351,7 +351,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!canAccess) {
       throw new Error('Acesso restrito ao administrador.');
     }
-    const res = await fetch(`/api/admin/platforms/${id}`, {
+    const { ok, data: resData, error } = await safeJsonFetch<any>(`/api/admin/platforms/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -360,11 +360,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Falha ao salvar credenciais');
+    if (!ok) {
+      throw new Error(error || resData?.error || 'Falha ao salvar credenciais.');
     }
 
+    onShowToast('Credenciais da plataforma salvas com sucesso!');
     fetchAdminData();
   };
 
@@ -373,16 +373,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     if (!canAccess) {
       throw new Error('Acesso restrito ao administrador.');
     }
-    const res = await fetch(`/api/admin/platforms/${id}/sync`, {
+    const { ok, data, error } = await safeJsonFetch<any>(`/api/admin/platforms/${id}/sync`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Falha ao sincronizar');
+    if (!ok) {
+      throw new Error(error || data?.error || 'Falha ao sincronizar plataforma.');
     }
 
+    onShowToast(`✅ ${data?.message || 'Sincronização de catálogo efetuada com sucesso!'}`);
     fetchAdminData();
     onRefreshOffers();
   };

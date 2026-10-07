@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Offer, OfferStatus, AdminStats, PlatformCredential } from '../types/store.ts';
+import type { Offer, OfferStatus, AdminStats, PlatformCredential } from '../types/store.ts';
 import { INITIAL_OFFERS } from '../data/initialOffers.ts';
+import { safeJsonFetch } from '../utils/api.ts';
 
 // Get Supabase credentials from Vite environment or localStorage
 export const getSupabaseConfig = () => {
@@ -178,12 +179,9 @@ export async function fetchOffersDirectly(options: FetchOffersOptions = {}): Pro
     if (options.status) params.set('status', options.status);
     if (options.sortBy) params.set('sortBy', options.sortBy);
 
-    const res = await fetch(`/api/offers?${params.toString()}`);
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-        return json.data;
-      }
+    const { ok, data } = await safeJsonFetch<any>(`/api/offers?${params.toString()}`);
+    if (ok && data?.data && Array.isArray(data.data) && data.data.length > 0) {
+      return data.data;
     }
   } catch (apiErr) {
     // API local não disponível
@@ -266,16 +264,21 @@ export async function triggerVitrineSync(): Promise<{
   data?: any;
 }> {
   try {
-    const res = await fetch('/api/sync/vitrine', {
+    const { ok, data, error } = await safeJsonFetch<any>('/api/sync/vitrine', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
-    const json = await res.json();
-    return json;
+    if (ok && data) {
+      return data;
+    }
+    return {
+      success: false,
+      message: error || data?.error || 'Falha ao sincronizar vitrines das plataformas.',
+    };
   } catch (err: any) {
     return {
       success: false,
-      message: err.message || 'Falha ao sincronizar vitrines das plataformas.',
+      message: err?.message || 'Falha ao sincronizar vitrines das plataformas.',
     };
   }
 }

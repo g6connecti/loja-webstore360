@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, Radio, ExternalLink } from 'lucide-react';
-import { Offer } from '../types/store.ts';
+import type { Offer } from '../types/store.ts';
 import { OfferCard } from './OfferCard.tsx';
 
 interface ShowcaseCarouselProps {

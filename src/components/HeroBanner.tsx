@@ -1,6 +1,6 @@
 import React from 'react';
 import { Zap, Flame, ShieldCheck, Tag, Sparkles, TrendingUp, CheckCircle2, Radio } from 'lucide-react';
-import { PlatformType } from '../types/store.ts';
+import type { PlatformType } from '../types/store.ts';
 
 interface HeroBannerProps {
   selectedPlatform: string;

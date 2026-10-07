@@ -12,16 +12,23 @@ export async function getPlatforms() {
   }
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function updatePlatformCredentials(
   id: string,
   data: Partial<typeof plataformasCredenciais.$inferInsert>
 ) {
   try {
     data.updatedAt = new Date();
+    const isUuid = UUID_REGEX.test(id);
+    const whereCondition = isUuid
+      ? eq(plataformasCredenciais.id, id)
+      : eq(plataformasCredenciais.platformName, id);
+
     const updated = await db
       .update(plataformasCredenciais)
       .set(data)
-      .where(eq(plataformasCredenciais.id, id))
+      .where(whereCondition)
       .returning();
     return updated[0] || null;
   } catch (error) {
@@ -32,17 +39,27 @@ export async function updatePlatformCredentials(
 
 export async function syncPlatform(id: string) {
   try {
+    const isUuid = UUID_REGEX.test(id);
+    const whereCondition = isUuid
+      ? eq(plataformasCredenciais.id, id)
+      : eq(plataformasCredenciais.platformName, id);
+
     const existing = await db
       .select()
       .from(plataformasCredenciais)
-      .where(eq(plataformasCredenciais.id, id))
+      .where(whereCondition)
       .limit(1);
 
     const platform = existing[0];
-    if (platform && platform.platformName === 'shopee') {
-      await syncShopeeStorefront(platform.affiliatePartnerId || 'lagarelli180');
-    } else if (platform && platform.platformName === 'mercadolivre') {
-      await syncMercadoLivreStorefront(platform.affiliatePartnerId || 'luizricardoagarelli');
+    if (!platform) {
+      return null;
+    }
+
+    let syncDetails: any = null;
+    if (platform.platformName === 'shopee') {
+      syncDetails = await syncShopeeStorefront(platform.affiliatePartnerId || 'lagarelli180');
+    } else if (platform.platformName === 'mercadolivre') {
+      syncDetails = await syncMercadoLivreStorefront(platform.affiliatePartnerId || 'luizricardoagarelli');
     }
 
     const updated = await db
@@ -51,9 +68,14 @@ export async function syncPlatform(id: string) {
         lastSyncedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(plataformasCredenciais.id, id))
+      .where(eq(plataformasCredenciais.id, platform.id))
       .returning();
-    return updated[0] || null;
+
+    const result = updated[0] || platform;
+    return {
+      ...result,
+      syncDetails,
+    };
   } catch (error) {
     console.error('Failed to sync platform:', error);
     throw new Error('Database update failed while syncing platform.', { cause: error });

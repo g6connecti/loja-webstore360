@@ -1,4 +1,4 @@
-import { PlatformCredential } from '../types/store.ts';
+import type { PlatformCredential } from '../types/store.ts';
 
 export const DEFAULT_PLATFORMS: PlatformCredential[] = [
   {

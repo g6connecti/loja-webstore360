@@ -14,9 +14,10 @@ import { OfferDetailModal } from './components/OfferDetailModal.tsx';
 import { ShareModal } from './components/ShareModal.tsx';
 import { AdminModal } from './components/AdminModal.tsx';
 import { ArchitectureModal } from './components/ArchitectureModal.tsx';
+import { SocialBannersModal } from './components/SocialBannersModal.tsx';
 import { Toast } from './components/Toast.tsx';
 import { Footer } from './components/Footer.tsx';
-import { Offer } from './types/store.ts';
+import type { Offer } from './types/store.ts';
 import { Zap, ShoppingBag, AlertCircle, Wrench, Package, Sparkles, Globe, RefreshCw, Radio, CheckCircle2 } from 'lucide-react';
 import { fetchOffersDirectly, subscribeToOffersRealtime, triggerVitrineSync, isSupabaseConfigured } from './lib/supabase.ts';
 
@@ -73,6 +74,7 @@ function PublicShowcase() {
   const [shareOffer, setShareOffer] = useState<Offer | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
+  const [isSocialBannersOpen, setIsSocialBannersOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -257,6 +259,7 @@ function PublicShowcase() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenSocialBanners={() => setIsSocialBannersOpen(true)}
         onOpenArchitecture={() => setIsArchitectureOpen(true)}
         activeFilterCount={activeFilterCount}
       />
@@ -559,7 +562,7 @@ function PublicShowcase() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onOpenSocialBanners={() => setIsSocialBannersOpen(true)} />
 
       {/* Offer Details Modal */}
       <OfferDetailModal
@@ -573,6 +576,13 @@ function PublicShowcase() {
       <ShareModal
         offer={shareOffer}
         onClose={() => setShareOffer(null)}
+        onShowToast={showToast}
+      />
+
+      {/* Social Media Banners & Promo Kit Modal */}
+      <SocialBannersModal
+        isOpen={isSocialBannersOpen}
+        onClose={() => setIsSocialBannersOpen(false)}
         onShowToast={showToast}
       />
 
