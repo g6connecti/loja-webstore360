@@ -3,9 +3,10 @@ import { ShieldCheck, Heart, Sparkles, Database } from 'lucide-react';
 
 interface FooterProps {
   onOpenSocialBanners?: () => void;
+  onOpenSemTelinha?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenSocialBanners }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenSocialBanners, onOpenSemTelinha }) => {
   return (
     <footer className="bg-slate-950 border-t border-slate-800 text-slate-400 text-xs py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -26,6 +27,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenSocialBanners }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {onOpenSemTelinha && (
+              <button
+                onClick={onOpenSemTelinha}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[11px] text-purple-300 hover:text-white hover:border-purple-500 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>Subpágina Sem Telinha</span>
+              </button>
+            )}
+
             {onOpenSocialBanners && (
               <button
                 onClick={onOpenSocialBanners}

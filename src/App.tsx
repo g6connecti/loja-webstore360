@@ -15,6 +15,7 @@ import { ShareModal } from './components/ShareModal.tsx';
 import { AdminModal } from './components/AdminModal.tsx';
 import { ArchitectureModal } from './components/ArchitectureModal.tsx';
 import { SocialBannersModal } from './components/SocialBannersModal.tsx';
+import { SemTelinhaPage } from './components/SemTelinhaPage.tsx';
 import { Toast } from './components/Toast.tsx';
 import { Footer } from './components/Footer.tsx';
 import type { Offer } from './types/store.ts';
@@ -69,13 +70,62 @@ function PublicShowcase() {
   const [flashDealsOnly, setFlashDealsOnly] = useState(false);
   const [sortBy, setSortBy] = useState('title_asc');
 
-  // Modals
+  // Subpages & Modals
+  const [isSemTelinhaOpen, setIsSemTelinhaOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return (
+        window.location.pathname.startsWith('/sem-telinha') ||
+        window.location.hash === '#sem-telinha' ||
+        window.location.search.includes('page=sem-telinha')
+      );
+    }
+    return false;
+  });
+
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [shareOffer, setShareOffer] = useState<Offer | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isArchitectureOpen, setIsArchitectureOpen] = useState(false);
   const [isSocialBannersOpen, setIsSocialBannersOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Sync browser URL with Sem Telinha subpage
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const isSub =
+        window.location.pathname.startsWith('/sem-telinha') ||
+        window.location.hash === '#sem-telinha' ||
+        window.location.search.includes('page=sem-telinha');
+      setIsSemTelinhaOpen(isSub);
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const openSemTelinha = () => {
+    try {
+      window.history.pushState(null, '', '/sem-telinha');
+    } catch {
+      window.location.hash = '#sem-telinha';
+    }
+    setIsSemTelinhaOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closeSemTelinha = () => {
+    try {
+      window.history.pushState(null, '', '/');
+    } catch {
+      window.location.hash = '';
+    }
+    setIsSemTelinhaOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -251,6 +301,45 @@ function PublicShowcase() {
 
   const isBrowsingFiltered = searchQuery.trim().length > 0 || selectedCategory !== 'all' || selectedPlatform !== 'all' || flashDealsOnly;
 
+  if (isSemTelinhaOpen) {
+    return (
+      <div className="min-h-screen bg-[#121214] text-[#e1e1e6]">
+        <SemTelinhaPage
+          onBackToHome={closeSemTelinha}
+          offers={offers}
+          onOpenOfferDetail={setSelectedOffer}
+          onShowToast={showToast}
+        />
+
+        {/* Offer Details Modal */}
+        <OfferDetailModal
+          offer={selectedOffer}
+          onClose={() => setSelectedOffer(null)}
+          onShare={setShareOffer}
+          onShowToast={showToast}
+        />
+
+        {/* Share Modal */}
+        <ShareModal
+          offer={shareOffer}
+          onClose={() => setShareOffer(null)}
+          onShowToast={showToast}
+        />
+
+        {/* Admin Panel Modal */}
+        <AdminModal
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          onRefreshOffers={fetchOffers}
+          onShowToast={showToast}
+        />
+
+        {/* Toast Notification */}
+        <Toast message={toastMessage} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#121214] text-[#e1e1e6] selection:bg-purple-600 selection:text-white">
       
@@ -261,6 +350,7 @@ function PublicShowcase() {
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenSocialBanners={() => setIsSocialBannersOpen(true)}
         onOpenArchitecture={() => setIsArchitectureOpen(true)}
+        onOpenSemTelinha={openSemTelinha}
         activeFilterCount={activeFilterCount}
       />
 
@@ -562,7 +652,10 @@ function PublicShowcase() {
       </main>
 
       {/* Footer */}
-      <Footer onOpenSocialBanners={() => setIsSocialBannersOpen(true)} />
+      <Footer
+        onOpenSocialBanners={() => setIsSocialBannersOpen(true)}
+        onOpenSemTelinha={openSemTelinha}
+      />
 
       {/* Offer Details Modal */}
       <OfferDetailModal

@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sem Telinha | Vida Sem Tela - Guia Prático Oficial</title>
+  <meta name="description" content="Mais de 100 atividades lúdicas e práticas para desconectar as crianças dos celulares e tablets, resgatando a imaginação e os momentos em família." />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <style>
+    :root {
+      --bg: #121214;
+      --card-bg: #18181b;
+      --card-inner: #141416;
+      --text: #e1e1e6;
+      --text-muted: #a1a1aa;
+      --purple: #8257e5;
+      --purple-light: #c084fc;
+      --pink: #ff007a;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --border: #27272a;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: rgba(18, 18, 20, 0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.75rem;
+      background: #27272a;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      border: 1px solid #3f3f46;
+    }
+    .back-btn:hover {
+      background: #3f3f46;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(130, 87, 229, 0.4);
+      border: 1px solid rgba(130, 87, 229, 0.5);
+      background: #18181b;
+      flex-shrink: 0;
+    }
+    .logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .brand-title span {
+      background: linear-gradient(to right, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-links {
+      display: none;
+      gap: 1.5rem;
+    }
+    @media (min-width: 900px) {
+      .nav-links {
+        display: flex;
+      }
+    }
+    .nav-links a {
+      color: #a1a1aa;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--purple-light);
+    }
+    .btn-cta-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(to right, var(--purple), var(--pink));
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(130, 87, 229, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-cta-nav:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1e1333 0%, #161324 50%, #121214 100%);
+      border: 1px solid rgba(130, 87, 229, 0.3);
+      border-radius: 2rem;
+      padding: 3.5rem 2.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+    @media (min-width: 900px) {
+      .hero {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(130, 87, 229, 0.15);
+      border: 1px solid rgba(130, 87, 229, 0.4);
+      color: #c084fc;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-size: 2.3rem;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    @media (min-width: 600px) {
+      .hero h1 {
+        font-size: 3rem;
+      }
+    }
+    .hero h1 span {
+      background: linear-gradient(to right, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.05rem;
+      color: #d4d4d8;
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+    .hero-features {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 600px) {
+      .hero-features {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #e4e4e7;
+      background: rgba(24, 24, 27, 0.6);
+      border: 1px solid #27272a;
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.75rem;
+    }
+    .feature-check {
+      color: var(--emerald);
+      font-weight: 900;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.95rem 2rem;
+      border-radius: 1rem;
+      background: linear-gradient(to right, var(--purple), var(--pink));
+      color: #fff;
+      font-weight: 900;
+      text-decoration: none;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 24px rgba(130, 87, 229, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.95rem 1.6rem;
+      border-radius: 1rem;
+      background: #27272a;
+      color: #d4d4d8;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.95rem;
+      border: 1px solid #3f3f46;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #3f3f46;
+      color: #fff;
+    }
+
+    /* CARD MOCKUP */
+    .mockup-card {
+      background: var(--card-bg);
+      border: 2px solid rgba(130, 87, 229, 0.35);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      text-align: center;
+      position: relative;
+    }
+    .mockup-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 1.25rem;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      margin: 0 auto 1.25rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(130, 87, 229, 0.4);
+    }
+    .mockup-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .mockup-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .mockup-specs {
+      background: #121214;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.8rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .spec-label {
+      color: #71717a;
+    }
+    .spec-val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* COMPARISON */
+    .section-title {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 2.5rem auto;
+    }
+    .badge-sub {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--pink);
+      background: rgba(255, 0, 122, 0.1);
+      border: 1px solid rgba(255, 0, 122, 0.3);
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      margin-bottom: 0.75rem;
+    }
+    .section-title h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .comp-box {
+      border-radius: 1.5rem;
+      padding: 2rem;
+    }
+    .comp-bad {
+      background: rgba(127, 29, 29, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .comp-good {
+      background: rgba(88, 28, 135, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+    .comp-box h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+      color: #fff;
+    }
+    .comp-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      font-size: 0.9rem;
+      color: #d4d4d8;
+    }
+
+    /* 4 PILARES */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.75rem;
+      transition: all 0.25s;
+    }
+    .card:hover {
+      border-color: rgba(130, 87, 229, 0.5);
+      transform: translateY(-3px);
+    }
+    .card-icon {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+    .card h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* CONTEÚDO */
+    .content-box {
+      background: linear-gradient(135deg, #181426, #121214);
+      border: 1px solid rgba(130, 87, 229, 0.3);
+      border-radius: 2rem;
+      padding: 3rem 2rem;
+    }
+    .content-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    .item-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+    }
+    .item-card h4 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+    .item-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* GARANTIA */
+    .guarantee-box {
+      background: var(--card-bg);
+      border: 2px solid rgba(245, 158, 11, 0.4);
+      border-radius: 2rem;
+      padding: 3rem 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .guarantee-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .guarantee-box h3 {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .guarantee-box p {
+      font-size: 0.95rem;
+      color: #d4d4d8;
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+
+    /* FAQ */
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .faq-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 1.25rem 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      background: transparent;
+      width: 100%;
+      border: none;
+      text-align: left;
+    }
+    .faq-question:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .faq-answer {
+      padding: 0 1.5rem 1.25rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 1rem;
+      display: none;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    .faq-icon {
+      font-size: 1.2rem;
+      color: var(--purple-light);
+      transition: transform 0.2s;
+    }
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    /* CTA FINAL */
+    .cta-final {
+      background: linear-gradient(135deg, rgba(130, 87, 229, 0.4), rgba(255, 0, 122, 0.4));
+      border: 1px solid rgba(130, 87, 229, 0.5);
+      border-radius: 2rem;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .cta-final h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .cta-final p {
+      font-size: 1.05rem;
+      color: #e4e4e7;
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      background: #0e0e10;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: #71717a;
+      font-size: 0.85rem;
+    }
+    footer a {
+      color: var(--purple-light);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo-badge">
+          <img src="/assets/images/sem_telinha_logo.jpg" alt="Logo Sem Telinha" />
+        </div>
+        <div>
+          <div class="brand-title">Sem <span>Telinha</span></div>
+          <div style="font-size: 0.65rem; color: #a1a1aa; font-weight: 500;">Vida Sem Tela • Guia Digital Oficial</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#sobre">Sobre o Guia</a>
+        <a href="#beneficios">Benefícios</a>
+        <a href="#conteudo">Conteúdo</a>
+        <a href="#garantia">Garantia</a>
+        <a href="#faq">Dúvidas</a>
+      </nav>
+
+      <a
+        href="https://go.hotmart.com/W107978330M"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-cta-nav"
+      >
+        Garantir Acesso ↗
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div>
+        <div class="hero-badge">Guia Prático Oficial • Vida Sem Tela</div>
+        <h1>Resgate a infância do seu filho <span>longe das telas.</span></h1>
+        <p>Mais de <strong>100 atividades lúdicas, práticas e criativas</strong> para reduzir o uso excessivo de celulares, tablets e TV, estimulando a imaginação, o foco e momentos inesquecíveis em família.</p>
+        
+        <div class="hero-features">
+          <div class="feature-item"><span class="feature-check">✓</span> Acesso Imediato e 100% Digital</div>
+          <div class="feature-item"><span class="feature-check">✓</span> Materiais simples de casa</div>
+          <div class="feature-item"><span class="feature-check">✓</span> Para crianças de 1 a 12 anos</div>
+          <div class="feature-item"><span class="feature-check">✓</span> 7 Dias de Garantia Hotmart</div>
+        </div>
+
+        <div class="hero-actions">
+          <a
+            href="https://go.hotmart.com/W107978330M"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary"
+            style="flex-direction: column; gap: 0.25rem; text-align: center;"
+          >
+            <span>QUERO GARANTIR MEU ACESSO AGORA ↗</span>
+            <span style="font-size: 0.75rem; font-weight: 600; opacity: 0.95;">2 x de R$ 10,32 * Ou R$ 19,90 à vista</span>
+          </a>
+          <a href="#conteudo" class="btn-secondary">Ver o Que Inclui</a>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div style="width: 100%; border-radius: 1.25rem; overflow: hidden; border: 2px solid rgba(130, 87, 229, 0.4); box-shadow: 0 12px 30px rgba(130, 87, 229, 0.35); margin-bottom: 1.25rem; background: #121214; position: relative;">
+          <img src="/sem-telinha/images/hero_guide.jpg" alt="Guia Oficial Sem Telinha - Livro de Atividades e Fichas" style="width: 100%; height: auto; display: block;" />
+          <div style="position: absolute; top: 0.75rem; right: 0.75rem; background: rgba(18, 18, 20, 0.9); border: 1px solid rgba(130, 87, 229, 0.5); color: #c084fc; font-size: 0.65rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 9999px;">
+            +100 Atividades
+          </div>
+        </div>
+        <h3 class="mockup-title">Guia Sem Telinha</h3>
+        <p class="mockup-subtitle">O método lúdico que transforma a rotina infantil</p>
+
+        <div class="mockup-specs">
+          <div class="spec-row"><span class="spec-label">Formato:</span><span class="spec-val">E-book Digital + Fichas</span></div>
+          <div class="spec-row"><span class="spec-label">Atividades:</span><span class="spec-val">+100 Dinâmicas</span></div>
+          <div class="spec-row"><span class="spec-label">Entrega:</span><span class="spec-val">Acesso Imediato</span></div>
+          <div class="spec-row"><span class="spec-label">Garantia:</span><span class="spec-val">7 Dias Incondicionais</span></div>
+        </div>
+
+        <a
+          href="https://go.hotmart.com/W107978330M"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary"
+          style="width: 100%; justify-content: center; flex-direction: column; gap: 0.25rem; text-align: center; padding: 0.75rem 1rem;"
+        >
+          <span>Conferir Oferta na Hotmart ↗</span>
+          <span style="font-size: 0.7rem; font-weight: 600; opacity: 0.95;">2 x de R$ 10,32 * Ou R$ 19,90 à vista</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- VÍDEO OFICIAL / VSL -->
+    <section id="video" style="max-width: 900px; margin: 0 auto 3.5rem auto; padding: 0 1rem; text-align: center;">
+      <div class="section-title" style="margin-bottom: 1.5rem;">
+        <div class="badge-sub">🎬 Vídeo Explicativo</div>
+        <h2>Veja Como o Sem Telinha Funciona na Prática</h2>
+        <p>Assista à breve apresentação e descubra como resgatar a imaginação, o foco e os momentos felizes em família com brincadeiras simples e divertidas.</p>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <button
+          onclick="toggleShortsRatio()"
+          id="btnRatioToggle"
+          style="background: #27272a; border: 1px solid #3f3f46; color: #d4d4d8; padding: 0.4rem 0.85rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;"
+        >
+          📱 Formato Celular (9:16)
+        </button>
+        <button
+          onclick="openVideoConfigModal()"
+          style="background: #27272a; border: 1px solid #3f3f46; color: #d4d4d8; padding: 0.4rem 0.85rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;"
+        >
+          ⚙️ Personalizar / Trocar Vídeo
+        </button>
+      </div>
+
+      <div style="background: #121214; border: 2px solid rgba(130, 87, 229, 0.4); border-radius: 1.5rem; padding: 0.75rem; box-shadow: 0 20px 40px rgba(130, 87, 229, 0.2); overflow: hidden; position: relative;">
+        <div id="videoContainer" style="position: relative; width: 100%; max-width: 420px; margin: 0 auto; aspect-ratio: 9/16; background: #000; border-radius: 1rem; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <iframe
+            id="mainVideoIframe"
+            src="https://www.youtube-nocookie.com/embed/FZGj8o3ly3Q?rel=0&modestbranding=1"
+            title="Sem Telinha - Apresentação Oficial"
+            style="width: 100%; height: 100%; border: none; border-radius: 1rem;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0.5rem 0.5rem 0.5rem;">
+          <div style="font-size: 0.8rem; color: #a1a1aa; display: flex; items-center: center; gap: 0.5rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+            <span>Pronto para aplicar hoje mesmo com as crianças</span>
+          </div>
+          <a
+            href="https://go.hotmart.com/W107978330M"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary"
+            style="padding: 0.65rem 1.25rem; font-size: 0.8rem;"
+          >
+            Garantir Meu Acesso Agora ↗
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- O PROBLEMA VS SOLUÇÃO -->
+    <section id="sobre">
+      <div class="section-title">
+        <div class="badge-sub">A Realidade das Famílias</div>
+        <h2>O excesso de telas não precisa ser o padrão da sua casa</h2>
+        <p>Muitos pais se sentem sobrecarregados quando as crianças pedem o celular para passar o tempo. Existe um caminho mais leve e saudável.</p>
+      </div>
+
+      <!-- Banner Emocional de Família -->
+      <div style="max-width: 900px; margin: 0 auto 2.5rem auto; border-radius: 1.5rem; overflow: hidden; border: 1px solid rgba(130, 87, 229, 0.35); box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative;">
+        <img src="/sem-telinha/images/family_fun.jpg" alt="Família unida e feliz brincando sem telas e celulares" style="width: 100%; max-height: 400px; object-fit: cover; display: block;" />
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(18,18,20,0.95), rgba(18,18,20,0.6) 60%, transparent); padding: 1.5rem 2rem; color: #fff;">
+          <div style="font-size: 0.75rem; font-weight: 800; color: #f472b6; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">❤️ Momentos que Ficam para Sempre</div>
+          <div style="font-size: 1.35rem; font-weight: 900; margin-bottom: 0.3rem;">Conexão real, risadas sinceras e imaginação viva em família</div>
+          <div style="font-size: 0.85rem; color: #e4e4e7;">Substitua o tédio e a dependência dos eletrônicos por brincadeiras práticas e envolventes.</div>
+        </div>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="comp-box comp-bad">
+          <h3>✕ Sem uma rotina criativa:</h3>
+          <ul>
+            <li>• Birras intensas toda vez que o celular é desligado.</li>
+            <li>• Dificuldade de concentração e pouca paciência para brincadeiras manuais.</li>
+            <li>• Sensação de cansaço dos pais por não saberem o que inventar na hora.</li>
+            <li>• Falta de estímulos motores e de convivência real com a família.</li>
+          </ul>
+        </div>
+
+        <div class="comp-box comp-good">
+          <h3>✓ Com o Guia Sem Telinha:</h3>
+          <ul>
+            <li>• Mais de 100 atividades prontas para aplicar em 15 a 30 minutos.</li>
+            <li>• Crianças mais calmas, criativas e focadas no dia a dia.</li>
+            <li>• Memórias afetivas e conexão genuína entre pais e filhos.</li>
+            <li>• Brincadeiras fáceis com materiais comuns que você já tem em casa.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- OS 4 PILARES -->
+    <section id="beneficios">
+      <div class="section-title">
+        <div class="badge-sub" style="color: var(--purple-light); border-color: rgba(130, 87, 229, 0.4);">Desenvolvimento Integral</div>
+        <h2>Os 4 Pilares da Infância Sem Telinha</h2>
+        <p>Projetado para estimular todas as áreas essenciais do crescimento da criança.</p>
+      </div>
+
+      <div class="grid-cards">
+        <div class="card">
+          <div class="card-icon">🎲</div>
+          <h3>Raciocínio & Lógica</h3>
+          <p>Desafios lógicos, jogos de cartas e quebra-cabeças que desenvolvem paciência e raciocínio crítico.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📚</div>
+          <h3>Linguagem & Imaginação</h3>
+          <p>Contação de histórias e brincadeiras narrativas que expandem o vocabulário e a capacidade criativa.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🎨</div>
+          <h3>Artes & Coordenação</h3>
+          <p>Recortes, colagens e modelagem para aprimorar a coordenação motora fina fundamental na idade escolar.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🌳</div>
+          <h3>Natureza & Movimento</h3>
+          <p>Brincadeiras ativas para gastar energia com saúde física, bom humor e melhora na qualidade do sono.</p>
+        </div>
+      </div>
+
+      <!-- Destaque Visual das Atividades -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        <div style="background: #18181b; border: 1px solid rgba(130, 87, 229, 0.35); border-radius: 1.5rem; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
+          <img src="/sem-telinha/images/kids_creative.jpg" alt="Crianças resolvendo desafios lúdicos e quebra-cabeças" style="width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;" />
+          <div style="padding: 1.25rem 1.5rem;">
+            <div style="font-size: 0.7rem; font-weight: 800; color: #c084fc; text-transform: uppercase; margin-bottom: 0.35rem;">Raciocínio & Foco</div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">Jogos de lógica, quebra-cabeças e blocos</h4>
+            <p style="font-size: 0.8rem; color: #a1a1aa; line-height: 1.5;">Desenvolvimento do foco prolongado e raciocínio crítico através de dinâmicas manuais e colaborativas.</p>
+          </div>
+        </div>
+
+        <div style="background: #18181b; border: 1px solid rgba(255, 0, 122, 0.35); border-radius: 1.5rem; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
+          <img src="/sem-telinha/images/kids_outdoor.jpg" alt="Crianças pintando aquarelas e criando dobraduras ao ar livre" style="width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;" />
+          <div style="padding: 1.25rem 1.5rem;">
+            <div style="font-size: 0.7rem; font-weight: 800; color: #f472b6; text-transform: uppercase; margin-bottom: 0.35rem;">Arte & Criatividade</div>
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">Pintura, dobraduras e imaginação sem limites</h4>
+            <p style="font-size: 0.8rem; color: #a1a1aa; line-height: 1.5;">Liberdade criativa usando materiais simples e acessíveis, aprimorando a coordenação motora fina com alegria.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTEÚDO -->
+    <section id="conteudo">
+      <div class="content-box">
+        <div class="section-title" style="margin-bottom: 1rem;">
+          <div class="badge-sub" style="color: var(--emerald); border-color: rgba(16, 185, 129, 0.4);">Conteúdo Completo</div>
+          <h2>Tudo o que você recebe ao adquirir o Sem Telinha</h2>
+          <p>Material organizado, prático e pronto para aplicar a qualquer momento.</p>
+        </div>
+
+        <div class="content-items">
+          <div class="item-card">
+            <h4>📖 +100 Atividades Ilustradas</h4>
+            <p>Instruções passo a passo com tempo estimado e faixa etária recomendada.</p>
+          </div>
+          <div class="item-card">
+            <h4>🎨 Fichas Imprimíveis para Colorir</h4>
+            <p>Desenhos temáticos e desafios manuais para recortar e montar.</p>
+          </div>
+          <div class="item-card">
+            <h4>⏱️ Dinâmicas Rápidas (10 a 20 min)</h4>
+            <p>Ideais para pais com rotina corrida mas que valorizam o tempo com os filhos.</p>
+          </div>
+          <div class="item-card">
+            <h4>👨‍👩‍👧‍👦 Jogos em Família</h4>
+            <p>Atividades para irmãos de diferentes idades e reuniões de família.</p>
+          </div>
+          <div class="item-card">
+            <h4>🌙 Dicas para Rotina de Sono</h4>
+            <p>Orientações práticas para desacelerar as crianças sem o uso de telas à noite.</p>
+          </div>
+          <div class="item-card">
+            <h4>♾️ Acesso Vitalício</h4>
+            <p>Consulte sempre que precisar direto no seu celular, computador ou tablet.</p>
+          </div>
+        </div>
+
+        <div style="text-align: center;">
+          <a
+            href="https://go.hotmart.com/W107978330M"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary"
+          >
+            QUERO ACESSAR O CONTEÚDO COMPLETO NA HOTMART ↗
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GARANTIA -->
+    <section id="garantia">
+      <div class="guarantee-box">
+        <!-- Selo 3D de Garantia Hotmart -->
+        <div style="width: 130px; height: 130px; margin: 0 auto 1.5rem auto; border-radius: 50%; overflow: hidden; border: 3px solid rgba(245, 158, 11, 0.5); box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3); background: #121214;">
+          <img src="/sem-telinha/images/guarantee_seal.jpg" alt="7 Dias de Garantia Incondicional Hotmart" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+        </div>
+        <h3>7 Dias de Garantia Incondicional pela Hotmart</h3>
+        <div style="margin: 0.5rem 0 1rem; display: inline-block; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 1rem; padding: 0.75rem 1.5rem; color: #fbbf24; font-weight: 900; font-size: 1.1rem;">
+          2 x de R$ 10,32 * Ou R$ 19,90 à vista
+        </div>
+        <p>Você pode adquirir o guia com total segurança e tranquilidade. Teste as brincadeiras e atividades por <strong>7 dias</strong>. Se por qualquer motivo achar que não valeu a pena, basta solicitar o reembolso integral diretamente na plataforma da Hotmart, com 1 clique e sem burocracia.</p>
+        <a
+          href="https://go.hotmart.com/W107978330M"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary"
+          style="background: linear-gradient(to right, #f59e0b, #d97706); color: #000; font-weight: 900; flex-direction: column; gap: 0.25rem; text-align: center;"
+        >
+          <span>COMPRAR COM GARANTIA DE 7 DIAS ↗</span>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #1e1b4b;">2 x de R$ 10,32 * Ou R$ 19,90 à vista</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="section-title">
+        <div class="badge-sub">Dúvidas Frequentes</div>
+        <h2>Perguntas Frequentes sobre o Sem Telinha</h2>
+        <p>Clique nas perguntas para abrir e ler as respostas.</p>
+      </div>
+
+      <div class="faq-container">
+        <div class="faq-item active">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Como vou receber o acesso ao material?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            Assim que o pagamento for aprovado pela Hotmart, você recebe imediatamente um e-mail com os seus dados de acesso exclusivos. O download pode ser feito de forma instantânea em celulares, computadores ou tablets.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Preciso imprimir todas as atividades ou posso usar digitalmente?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            Você tem total liberdade! O material é 100% digital em formato de alta resolução. Você pode consultar as atividades diretamente na tela do celular para orientar as brincadeiras ou imprimir as fichas lúdicas para as crianças colorirem e recortarem.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Para quais faixas etárias o programa é recomendado?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            O guia foi estruturado com atividades práticas e dinâmicas divididas para crianças desde a primeira infância (1 a 3 anos) até os 12 anos de idade, estimulando coordenação, raciocínio e convivência.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Os materiais necessários para as brincadeiras são caros?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            Não! O grande diferencial do método Sem Telinha é priorizar itens que você já tem em casa: papel, copos plásticos, pregadores, caixas de papelão, almofadas, lápis de cor e muita imaginação.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Como funciona a garantia de 7 dias?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            A sua compra é intermediada e protegida pela Hotmart. Você tem 7 dias corridos para experimentar todas as atividades. Se por qualquer motivo achar que não atendeu às suas expectativas, basta solicitar o reembolso integral diretamente na plataforma da Hotmart.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span>Onde posso conferir o valor atual e formas de pagamento?</span>
+            <span class="faq-icon">▼</span>
+          </button>
+          <div class="faq-answer">
+            O valor oficial, eventuais descontos de lote e condições de parcelamento no cartão ou Pix são atualizados em tempo real diretamente na página de pagamento oficial e segura da Hotmart através dos botões desta página.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final">
+      <h2>Dê o primeiro passo para uma infância mais ativa e feliz</h2>
+      <p>Garanta o seu acesso ao guia <strong>Sem Telinha</strong> através do link oficial na Hotmart com garantia incondicional de 7 dias e acesso imediato.</p>
+      <a
+        href="https://go.hotmart.com/W107978330M"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary"
+        style="font-size: 1.1rem; padding: 1.2rem 2.5rem;"
+      >
+        QUERO MEU GUIA SEM TELINHA NA HOTMART ↗
+      </a>
+      <p style="font-size: 0.8rem; color: #a1a1aa; margin-top: 1.5rem; margin-bottom: 0;">
+        Transação 100% segura e processada pela Hotmart • Acesso imediato no seu e-mail
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>WebStore360 • Sem Telinha • Página oficial de vendas do produto digital Vida Sem Tela</p>
+    <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+      Este site promove produtos digitais com links oficiais e verificados. A transação e entrega são de responsabilidade da Hotmart.
+    </p>
+  </footer>
+
+  <!-- Modal de Configuração de Vídeo (HTML Estático) -->
+  <div id="videoModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem;">
+    <div style="background: #18181b; border: 1px solid rgba(130, 87, 229, 0.4); border-radius: 1.5rem; max-width: 500px; width: 100%; padding: 1.5rem; color: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800;">Configurar Vídeo da Apresentação</h3>
+        <button onclick="closeVideoConfigModal()" style="background: transparent; border: none; color: #a1a1aa; font-size: 1.25rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="background: #27272a; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.35rem;">Opção 1: Carregar Arquivo de Vídeo (MP4)</div>
+        <p style="font-size: 0.75rem; color: #a1a1aa; margin: 0 0 0.75rem 0;">Selecione o arquivo "criativo 000.mp4" do seu computador para rodar imediatamente.</p>
+        <input type="file" id="videoFileInput" accept="video/mp4,video/*" style="display: none;" onchange="handleStaticVideoFile(this)">
+        <button onclick="document.getElementById('videoFileInput').click()" style="width: 100%; padding: 0.65rem; background: #8257e5; color: #fff; border: none; border-radius: 0.75rem; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+          📁 Selecionar Arquivo do Computador
+        </button>
+      </div>
+
+      <div style="background: #27272a; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem;">
+        <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.35rem;">Opção 2: Inserir Link do YouTube ou Vimeo</div>
+        <input type="url" id="videoUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%; box-sizing: border-box; padding: 0.65rem; background: #121214; border: 1px solid #3f3f46; border-radius: 0.75rem; color: #fff; font-size: 0.8rem; margin-bottom: 0.5rem;">
+        <button onclick="saveStaticVideoUrl()" style="width: 100%; padding: 0.65rem; background: linear-gradient(135deg, #8257e5, #ff007a); color: #fff; border: none; border-radius: 0.75rem; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+          Salvar Link
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #27272a; padding-top: 0.75rem;">
+        <button onclick="resetStaticVideo()" style="background: none; border: none; color: #a1a1aa; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+          Restaurar Vídeo Padrão
+        </button>
+        <button onclick="closeVideoConfigModal()" style="background: #3f3f46; color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleFaq(button) {
+      const item = button.closest('.faq-item');
+      item.classList.toggle('active');
+    }
+
+    const videoPlayer = document.getElementById('mainVideoPlayer');
+    const playOverlay = document.getElementById('videoPlayOverlay');
+    const videoContainer = document.getElementById('videoContainer');
+    const videoModal = document.getElementById('videoModal');
+
+    function playStaticVideo() {
+      if (videoPlayer) {
+        videoPlayer.play().then(() => {
+          if (playOverlay) playOverlay.style.display = 'none';
+        }).catch((err) => {
+          console.error('Erro ao iniciar vídeo:', err);
+          alert('Não foi possível iniciar o vídeo automaticamente. Você pode escolher seu arquivo local ou link do YouTube clicando em "Personalizar / Trocar Vídeo".');
+        });
+      }
+    }
+
+    if (videoPlayer) {
+      videoPlayer.addEventListener('play', () => {
+        if (playOverlay) playOverlay.style.display = 'none';
+      });
+      videoPlayer.addEventListener('pause', () => {
+        if (playOverlay) playOverlay.style.display = 'flex';
+      });
+      videoPlayer.addEventListener('ended', () => {
+        if (playOverlay) playOverlay.style.display = 'flex';
+      });
+    }
+
+    function openVideoConfigModal() {
+      if (videoModal) videoModal.style.display = 'flex';
+    }
+
+    function closeVideoConfigModal() {
+      if (videoModal) videoModal.style.display = 'none';
+    }
+
+    function handleStaticVideoFile(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const objUrl = URL.createObjectURL(file);
+      if (videoPlayer) {
+        videoPlayer.src = objUrl;
+        videoPlayer.load();
+        videoPlayer.play().catch(e => console.log(e));
+        if (playOverlay) playOverlay.style.display = 'none';
+      }
+
+      // Envia para o servidor para persistência
+      const reader = new FileReader();
+      reader.onload = function() {
+        fetch('/api/sem-telinha/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoBase64: reader.result, filename: file.name })
+        }).catch(err => console.error(err));
+      };
+      reader.readAsDataURL(file);
+
+      closeVideoConfigModal();
+    }
+
+    function saveStaticVideoUrl() {
+      const url = document.getElementById('videoUrlInput').value.trim();
+      if (!url) return;
+
+      const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+      if (ytMatch) {
+        videoContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0&modestbranding=1" style="width: 100%; height: 100%; border: none; border-radius: 1rem;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        closeVideoConfigModal();
+        return;
+      }
+
+      const vimeoMatch = url.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|)(\d+)/);
+      if (vimeoMatch && vimeoMatch[1]) {
+        videoContainer.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&color=8257e5" style="width: 100%; height: 100%; border: none; border-radius: 1rem;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        closeVideoConfigModal();
+        return;
+      }
+
+      if (videoPlayer) {
+        videoPlayer.src = url;
+        videoPlayer.load();
+        videoPlayer.play().catch(e => console.log(e));
+        if (playOverlay) playOverlay.style.display = 'none';
+      }
+      closeVideoConfigModal();
+    }
+
+    let isShortsVertical = true;
+    function toggleShortsRatio() {
+      const vc = document.getElementById('videoContainer');
+      const btn = document.getElementById('btnRatioToggle');
+      if (!vc) return;
+      isShortsVertical = !isShortsVertical;
+      if (isShortsVertical) {
+        vc.style.maxWidth = '420px';
+        vc.style.aspectRatio = '9/16';
+        if (btn) btn.innerHTML = '📱 Formato Celular (9:16)';
+      } else {
+        vc.style.maxWidth = '100%';
+        vc.style.aspectRatio = '16/9';
+        if (btn) btn.innerHTML = '🖥️ Formato Panorâmico (16:9)';
+      }
+    }
+
+    function resetStaticVideo() {
+      const vc = document.getElementById('videoContainer');
+      if (vc) {
+        vc.innerHTML = `<iframe id="mainVideoIframe" src="https://www.youtube-nocookie.com/embed/FZGj8o3ly3Q?rel=0&modestbranding=1" title="Sem Telinha - Apresentação Oficial" style="width: 100%; height: 100%; border: none; border-radius: 1rem;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+      }
+      closeVideoConfigModal();
+    }
+  </script>
+</body>
+</html>

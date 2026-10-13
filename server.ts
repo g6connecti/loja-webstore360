@@ -19,6 +19,8 @@ import { syncAllVitrines, syncShopeeStorefront } from './src/services/vitrineSyn
 import { requireAuth, optionalAuth, signAdminToken, AUTHORIZED_ADMIN_EMAIL, AUTHORIZED_ADMIN_PASSWORD } from './src/middleware/auth.ts';
 import type { AuthRequest } from './src/middleware/auth.ts';
 
+import fs from 'fs';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +29,110 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
+
+// Static files from public directory (images, static html, videos)
+app.use(express.static(path.resolve(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Accept-Ranges', 'bytes');
+    }
+  }
+}));
+
+// Rota de streaming de vídeo com suporte completo a Range (HTTP 206 Partial Content) para navegadores
+app.get(['/sem-telinha/videos/:filename', '/assets/videos/:filename'], (req: Request, res: Response) => {
+  const filename = decodeURIComponent(req.params.filename);
+  const possiblePaths = [
+    path.resolve(__dirname, 'public', 'sem-telinha', 'videos', filename),
+    path.resolve(__dirname, 'public', 'sem-telinha', 'videos', 'criativo.mp4'),
+    path.resolve(__dirname, 'public', 'sem-telinha', 'videos', 'criativo 000.mp4'),
+    path.resolve(__dirname, 'public', 'assets', 'videos', filename),
+    path.resolve(__dirname, 'dist', 'sem-telinha', 'videos', filename),
+    path.resolve(__dirname, 'dist', 'sem-telinha', 'videos', 'criativo.mp4'),
+  ];
+
+  const videoPath = possiblePaths.find((p) => fs.existsSync(p));
+  if (!videoPath) {
+    return res.status(404).send('Vídeo não encontrado');
+  }
+
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, '').split('-');
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+    if (start >= fileSize) {
+      res.status(416).send(`Requested range not satisfiable: ${start} >= ${fileSize}`);
+      return;
+    }
+
+    const chunksize = end - start + 1;
+    const file = fs.createReadStream(videoPath, { start, end });
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Accept-Ranges': 'bytes',
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(videoPath).pipe(res);
+  }
+});
+
+// Endpoint para upload / atualização do vídeo da página Sem Telinha
+app.post('/api/sem-telinha/video', async (req: Request, res: Response) => {
+  try {
+    const { videoBase64, filename = 'criativo.mp4' } = req.body;
+    if (!videoBase64) {
+      return res.status(400).json({ success: false, error: 'Dados do vídeo (base64) são obrigatórios' });
+    }
+
+    const cleanBase64 = videoBase64.replace(/^data:video\/\w+;base64,/, '');
+    const buffer = Buffer.from(cleanBase64, 'base64');
+
+    const destDirs = [
+      path.resolve(__dirname, 'public', 'sem-telinha', 'videos'),
+      path.resolve(__dirname, 'dist', 'sem-telinha', 'videos'),
+      path.resolve(__dirname, 'public', 'assets', 'videos'),
+    ];
+
+    for (const dir of destDirs) {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(path.resolve(dir, 'criativo.mp4'), buffer);
+      fs.writeFileSync(path.resolve(dir, 'criativo 000.mp4'), buffer);
+      if (filename && filename !== 'criativo.mp4') {
+        fs.writeFileSync(path.resolve(dir, filename), buffer);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: 'Vídeo atualizado com sucesso!',
+      videoUrl: '/sem-telinha/videos/criativo.mp4',
+      sizeBytes: buffer.length,
+    });
+  } catch (error: any) {
+    console.error('Erro ao salvar vídeo:', error);
+    return res.status(500).json({ success: false, error: error.message || 'Falha ao salvar vídeo' });
+  }
+});
 
 // Public API - Get Offers (filtered by query)
 app.get('/api/offers', optionalAuth, async (req: AuthRequest, res: Response) => {
